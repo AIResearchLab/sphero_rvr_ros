@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: sphero-sdk
+Version: 0.3.4.post2
+Summary: Sphero SDK to run on Raspberry Pi using Python
+Home-page: https://github.com/sphero-inc/sphero-sdk-raspberrypi-python
+Author: Anthony Vizcarra
+Author-email: Anthony@sphero.com
+License: UNKNOWN
+Platform: UNKNOWN
+Requires-Dist: aiohttp
+Requires-Dist: pyserial
+Requires-Dist: pyserial-asyncio
+
+UNKNOWN
+
+

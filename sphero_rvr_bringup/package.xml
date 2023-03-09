@@ -15,4 +15,5 @@
   <depend>sphero_rvr_control</depend>
   <depend>sphero_rvr_controllers</depend>
   <depend>rosbridge_server</depend>
+  <depend>robot_upstart</depend>
 </package>

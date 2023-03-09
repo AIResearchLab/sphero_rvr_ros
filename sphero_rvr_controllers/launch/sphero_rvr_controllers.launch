@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="joy_dev" default="/dev/input/js0" />
-    <arg name="teleop_joy_config" default="$(find rvr_controllers)config/joy_config.yaml" />
-    <arg name="twist_mux_config"  default="$(find rvr_controllers)config/twist_mux.yaml"/>
+    <arg name="teleop_joy_config" default="$(find sphero_rvr_controllers)config/joy_config.yaml" />
+    <arg name="twist_mux_config"  default="$(find sphero_rvr_controllers)config/twist_mux.yaml"/>
 
     <!-- joy driver -->
     <node pkg="joy" type="joy_node" name="joy_node">

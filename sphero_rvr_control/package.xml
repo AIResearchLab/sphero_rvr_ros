@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>sphero_rvr_control</name>
+  <version>0.0.1</version>
+  <description>The sphero_rvr_control package</description>
+
+  <maintainer email="mppritchard3@hotmail.com">mik-p</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>sphero_rvr_driver</depend>
+  <depend>sphero_rvr_description</depend>
+
+</package>

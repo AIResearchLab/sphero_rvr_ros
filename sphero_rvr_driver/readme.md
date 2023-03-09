@@ -1,4 +1,4 @@
-rvr_control
+sphero_rvr_driver
 ===
 
 ROS driver sphero rvr

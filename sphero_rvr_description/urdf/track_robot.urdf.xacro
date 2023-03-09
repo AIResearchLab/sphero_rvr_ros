@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="track_robot">
+
+    <!--common-->
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/common.urdf.xacro" />
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/materials.urdf.xacro" />
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
+
+    <!-- parts -->
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/track.urdf.xacro" />
+
+
+    <link name="base_link" >
+        <origin xyz="0 0 ${rvr_body_height/2}" rpy="0 0 0" />
+        <visual>
+            <geometry>
+                <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
+            </geometry>
+            <material name="White"/>
+        </visual>
+    </link>
+
+    <xacro:track name="left_track" parent="base_link" length="${rvr_track_length}" spin="1" >
+        <origin xyz="0 ${rvr_body_width/2} 0" rpy="0 0 0" />
+    </xacro:track>
+
+    <xacro:track name="right_track" parent="base_link" length="${rvr_track_length}" spin="-1" >
+        <origin xyz="0 -${rvr_body_width/2} 0" rpy="${M_PI} 0 0" />
+    </xacro:track>
+
+</robot>

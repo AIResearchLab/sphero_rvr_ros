@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="wheel" params="name parent direction:=1 *origin">
+
+        <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
+
+        <joint name="${name}_joint" type="continuous" >
+            <parent link="${parent}" />
+            <child link="${name}" />
+            <xacro:insert_block name="origin" />
+            <axis xyz="0 ${direction} 0" rpy="0 0 0" />
+            <limit effort="30" velocity="0.2" />
+        </joint>
+
+        <link name="${name}">
+            <visual>
+                <origin xyz="0 ${rvr_wheel_width/2} 0" rpy="${M_PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${rvr_wheel_radius}" length="${rvr_wheel_width}" />
+                </geometry>
+                <material name="LightGrey2"/>
+            </visual>
+            <collision >
+                <origin xyz="0 ${rvr_wheel_width/2} 0" rpy="${M_PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${1.05*rvr_wheel_radius}" length="${1.05*rvr_wheel_width}" />
+                </geometry>
+            </collision>
+        </link>
+
+        <transmission name="${name}_trans" type="SimpleTransmission">
+            <type>transmission_interface/SimpleTransmission</type>
+            <actuator name="${name}_motor">
+            <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+            <joint name="${name}_joint">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+        </transmission>
+
+    </xacro:macro>
+
+</robot>

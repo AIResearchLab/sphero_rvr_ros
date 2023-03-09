@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <include file="$(find sphero_rvr_description)/launch/robot.launch" />
+
+  <include file="$(find sphero_rvr_description)/launch/display.launch" />
+
+  <include file="$(find sphero_rvr_description)/launch/state_publisher.launch" />
+
+</launch>

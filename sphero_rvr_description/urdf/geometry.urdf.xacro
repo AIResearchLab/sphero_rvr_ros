@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!-- robot geometric characteristics -->
+    <xacro:property name="rvr_body_length" value="0.21"/>
+    <xacro:property name="rvr_body_width" value="0.18"/>
+    <xacro:property name="rvr_body_height" value="0.055"/>
+
+    <xacro:property name="rvr_wheel_width" value="0.05"/>
+    <xacro:property name="rvr_wheel_radius" value="0.07"/>
+
+    <xacro:property name="rvr_track_length" value="0.19"/>
+    <xacro:property name="rvr_track_link_size" value="0.01"/>
+
+</robot>

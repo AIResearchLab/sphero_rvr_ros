@@ -116,12 +116,18 @@ class RVRDriver():
     def setup_rvr(self) -> None:
         rospy.loginfo("Waking up RVR...")
         self.rvr.wake()
+        rospy.loginfo("Waking up RVR... Done")
         time.sleep(2)
 
         self.rvr.reset_yaw()
         self.rvr.led_control.turn_leds_off()
+
+        rospy.loginfo("setting things up...")
         self.enable_sensors()
+        rospy.loginfo("publishers")
         self.create_ros_publishers()
+        rospy.loginfo("subscribers")
+        self.create_ros_subscribers()
 
         # create timer for driving callback
         # self.timer = rospy.Timer(
@@ -139,7 +145,7 @@ class RVRDriver():
 
     def create_ros_subscribers(self) -> None:
         # wheels speed subscriber
-        rospy.Subscriber(
+        self.wheel_sub = rospy.Subscriber(
             "~wheels/speed",
             Float32MultiArray,
             self.wheels_speed_callback,
@@ -147,20 +153,21 @@ class RVRDriver():
         )
 
         # cmd vel subscriber
-        rospy.Subscriber("~cmd_vel", Twist, self.cmd_vel_cb, queue_size=1)
+        self.vel_sub = rospy.Subscriber(
+            "~cmd_vel", Twist, self.cmd_vel_cb, queue_size=1)
 
         # rgb leds subscriber
-        rospy.Subscriber("~led/headlight/left", ColorRGBA,
-                         self.headlight_left_led_cb, queue_size=1)
+        self.led_hl_sub = rospy.Subscriber("~led/headlight/left", ColorRGBA,
+                                           self.headlight_left_led_cb, queue_size=1)
 
-        rospy.Subscriber("~led/headlight/right", ColorRGBA,
-                         self.headlight_right_led_cb, queue_size=1)
+        self.led_hr_sub = rospy.Subscriber("~led/headlight/right", ColorRGBA,
+                                           self.headlight_right_led_cb, queue_size=1)
 
-        rospy.Subscriber("~led/brake/left", ColorRGBA,
-                         self.brake_left_led_cb, queue_size=1)
+        self.led_bl_sub = rospy.Subscriber("~led/brake/left", ColorRGBA,
+                                           self.brake_left_led_cb, queue_size=1)
 
-        rospy.Subscriber("~led/brake/right", ColorRGBA,
-                         self.brake_right_led_cb, queue_size=1)
+        self.led_br_sub = rospy.Subscriber("~led/brake/right", ColorRGBA,
+                                           self.brake_right_led_cb, queue_size=1)
 
         # XXX TODO: add the other leds for the side panels
 
@@ -218,17 +225,17 @@ class RVRDriver():
     def headlight_left_led_cb(self, msg: ColorRGBA) -> None:
         # left headlight
         self.led_settings[RvrLedGroups.headlight_left] = [
-            int(msg.front_left_color.r),
-            int(msg.front_left_color.g),
-            int(msg.front_left_color.b),
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
         ]
 
     def headlight_right_led_cb(self, msg: ColorRGBA) -> None:
         # right headlight
         self.led_settings[RvrLedGroups.headlight_right] = [
-            int(msg.front_right_color.r),
-            int(msg.front_right_color.g),
-            int(msg.front_right_color.b),
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
         ]
 
     def brake_left_led_cb(self, msg: ColorRGBA) -> None:
@@ -256,16 +263,16 @@ class RVRDriver():
         # ]
         # back LED
         self.led_settings[RvrLedGroups.brakelight_left] = [
-            int(msg.back_color.r),
-            int(msg.back_color.g),
-            int(msg.back_color.b),
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
         ]
 
     def brake_right_led_cb(self, msg: ColorRGBA) -> None:
         self.led_settings[RvrLedGroups.brakelight_right] = [
-            int(msg.back_color.r),
-            int(msg.back_color.g),
-            int(msg.back_color.b),
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
         ]
 
     """ Robot Handlers """

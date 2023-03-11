@@ -65,8 +65,6 @@ class RVRDriver():
     )
 
     def __init__(self) -> None:
-        # init ROS node
-        rospy.init_node("rvr_sensing_test")
         # init robot API connection
         rospy.loginfo("Starting RVR API...")
         self.rvr = SpheroRvrObserver()
@@ -475,6 +473,9 @@ class RVRDriver():
 # main
 if __name__ == "__main__":
     try:
+        # init ROS node
+        rospy.init_node("rvr_driver")
+
         sensing_test = RVRDriver()
         rospy.spin()
 

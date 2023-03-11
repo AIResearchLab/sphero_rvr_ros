@@ -12,4 +12,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>sphero_rvr_control</depend>
+  <depend>sphero_rvr_controllers</depend>
+  <depend>urg_node</depend>
+  <depend>move_base</depend>
+  <depend>slam_gmapping</depend>
 </package>

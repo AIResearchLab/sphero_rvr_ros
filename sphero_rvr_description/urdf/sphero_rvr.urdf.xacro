@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="track_robot">
+
+    <!--common-->
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/common.urdf.xacro" />
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/materials.urdf.xacro" />
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
+
+    <!-- parts -->
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/track.urdf.xacro" />
+
+    <!-- urg laser -->
+    <xacro:include filename="$(find urg_node)/urdf/hokuyo_ust10.urdf.xacro" />
+
+
+    <!-- dummy base link no inertia to satisfy kdl -->
+    <link name="base_link"/>
+
+    <!-- Base footprint is on the ground under the robot -->
+    <link name="base_footprint"/>
+
+    <joint name="base_footprint_joint" type="fixed">
+        <origin xyz="0 0 ${-rvr_body_height/2 - 0.01}" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="base_footprint" />
+    </joint>
+
+    <!-- attach body to base_link -->
+    <joint name="body_inertia" type="fixed">
+        <parent link="base_link" />
+        <child link="body" />
+    </joint>
+
+    <!-- body acting as base link inertia -->
+    <link name="body" >
+        <origin xyz="0 0 ${rvr_body_height/2}" rpy="0 0 0" />
+        <visual>
+            <geometry>
+                <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
+            </geometry>
+            <material name="White"/>
+        </visual>
+        <collision >
+            <geometry>
+                <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- tracks -->
+    <xacro:track name="left_track" parent="base_link" length="${rvr_track_length}" spin="1" >
+        <origin xyz="0 ${rvr_body_width/2} ${rvr_track_dz}" rpy="0 0 0" />
+    </xacro:track>
+
+    <xacro:track name="right_track" parent="base_link" length="${rvr_track_length}" spin="-1" >
+        <origin xyz="0 -${rvr_body_width/2} ${rvr_track_dz}" rpy="${M_PI} 0 0" />
+    </xacro:track>
+
+    <!-- brain -->
+    <link name="pi_sbc" >
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <visual>
+            <geometry>
+                <box size="0.075 0.055 0.01" />
+            </geometry>
+            <material name="Green"/>
+        </visual>
+    </link>
+
+    <joint name="pi_sbc_joint" type="fixed" >
+        <parent link="base_link" />
+        <child link="pi_sbc" />
+        <origin xyz="-0.04 0 ${rvr_body_height/2 + 0.012}" rpy="0 0 0" />
+    </joint>
+
+    <!-- laser -->
+    <xacro:hokuyo_ust10_mount parent_link="base_link" prefix="urg" topic="scan" >
+        <origin xyz="${0.04} 0 ${rvr_body_height/2 + 0.002}" rpy="0 0 0" />
+    </xacro:hokuyo_ust10_mount>
+</robot>

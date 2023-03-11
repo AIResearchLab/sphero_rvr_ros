@@ -19,7 +19,7 @@
                 <geometry>
                     <cylinder radius="${rvr_wheel_radius}" length="${rvr_wheel_width}" />
                 </geometry>
-                <material name="LightGrey2"/>
+                <material name="DarkGrey"/>
             </visual>
             <collision >
                 <origin xyz="0 ${rvr_wheel_width/2} 0" rpy="${M_PI/2} 0 0" />

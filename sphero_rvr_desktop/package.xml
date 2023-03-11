@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>sphero_rvr_description</name>
+  <name>sphero_rvr_desktop</name>
   <version>0.0.0</version>
-  <description>The sphero_rvr_description package</description>
+  <description>The sphero_rvr_desktop package</description>
 
   <maintainer email="mik-p@github.com">mik p</maintainer>
 
@@ -12,8 +12,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>robot_state_publisher</depend>
-  <depend>joint_state_publisher</depend>
-  <depend>xacro</depend>
-  <depend>urg_node</depend>
+  <depend>rviz</depend>
 </package>

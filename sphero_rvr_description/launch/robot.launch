@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-  <arg name="model" default="$(find sphero_rvr_description)/urdf/track_robot.urdf.xacro"/>
+  <arg name="model" default="$(find sphero_rvr_description)/urdf/sphero_rvr.urdf.xacro"/>
 
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 

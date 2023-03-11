@@ -68,7 +68,7 @@ class RVRDriver():
         # init ROS node
         rospy.init_node("rvr_sensing_test")
         # init robot API connection
-        self.log("Starting RVR API...")
+        rospy.loginfo("Starting RVR API...")
         self.rvr = SpheroRvrObserver()
         # initial speed
         self.speed_params: Dict[str, float] = {
@@ -314,7 +314,7 @@ class RVRDriver():
         )
 
     def enable_sensors(self) -> None:
-        self.log("Enabling sensors...")
+        rospy.loginfo("Enabling sensors...")
         self.rvr.enable_color_detection(is_enabled=True)
         self.rvr.sensor_control.add_sensor_data_handler(
             service=RvrStreamingServices.accelerometer,
@@ -477,9 +477,11 @@ if __name__ == "__main__":
     try:
         sensing_test = RVRDriver()
         rospy.spin()
+
     except rospy.ROSInterruptException:
         time.sleep(0.5)
         sensing_test.rvr.led_control.turn_leds_off()
         sensing_test.rvr.close()
         rospy.loginfo("shutting rvr driver")
+
         exit()

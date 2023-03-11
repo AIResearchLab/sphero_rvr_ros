@@ -192,13 +192,19 @@ class RVRDriver():
         self.speed_params["right_velocity"] = round(msg.data[1], 2)
 
     def cmd_vel_cb(self, msg: Twist):
+        # safety constraints
+        x = self.constrain(
+            msg.linear.x, -1.0, 1.0)
+        yaw = self.constrain(
+            msg.angular.z, -6.0, 6.0)
+
         # apply x velocity evenly
         # apply yaw on top with kinematic model
-        self.speed_params["left_velocity"] = msg.linear.x - \
-            (msg.angular.z * self.separation / 2.0) / self.radius
+        self.speed_params["left_velocity"] = x - \
+            (yaw * self.separation / 2.0) / self.radius
 
-        self.speed_params["right_velocity"] = msg.linear.x + \
-            (msg.angular.z * self.separation / 2.0) / self.radius
+        self.speed_params["right_velocity"] = x + \
+            (yaw * self.separation / 2.0) / self.radius
 
         # round
         self.speed_params["left_velocity"] = round(
@@ -464,10 +470,49 @@ class RVRDriver():
             leds=list(self.led_settings.keys()),
             colors=list(itertools.chain(*self.led_settings.values())),
         )
-        # print(self.speed_params)
-        self.rvr.drive_tank_si_units(
-            **self.speed_params, timeout=self.CALLBACK_INTERVAL_DURATION
+
+        # get magnitude
+        l = abs(self.speed_params["left_velocity"])
+        r = abs(self.speed_params["right_velocity"])
+
+        # get direction
+        dl = 0
+        dr = 0
+
+        if l > 0:
+            dl = int(self.speed_params["left_velocity"] / l)
+            if dl < 0:
+                dl = 2
+
+        if r > 0:
+            dr = int(self.speed_params["left_velocity"] / r)
+            if dr < 0:
+                dr = 2
+
+        # scale values into motor space
+        max_wheel_speed = 6.0
+        l = int(255 * (l / max_wheel_speed))
+        r = int(255 * (r / max_wheel_speed))
+
+        # apply a deadzone
+        deadzone = 25
+        if l < deadzone and r < deadzone:
+            l = 0
+            dl = 0
+            r = 0
+            dr = 0
+
+        # send motor command
+        self.rvr.raw_motors(
+            dl,
+            l,
+            dr,
+            r,
+            timeout=self.CALLBACK_INTERVAL_DURATION
         )
+
+    def constrain(val, min_val, max_val):
+        return min(max_val, max(min_val, val))
 
 
 # main

@@ -10,7 +10,7 @@ The purpose of this script is to make the robot
 turn around, to test that UART can work properly for a longer
 operating time when using the treads and sensors.
 
-To stop the script, use Ctrl+Z.
+To stop the script, use Ctrl+C.
 """
 
 
@@ -20,9 +20,8 @@ import itertools
 from typing import Dict, List, FrozenSet
 from std_msgs.msg import Float32MultiArray, ColorRGBA
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Twist, Quaternion, Pose, Vector3
+from geometry_msgs.msg import Twist, Quaternion, Vector3
 from sensor_msgs.msg import Imu, Illuminance
-# import tf
 import tf_conversions
 from math import pi
 from sphero_sdk import RvrLedGroups
@@ -111,6 +110,7 @@ class RVRDriver():
         self.quat_reading: Dict[str, float] = {"W": 0, "X": 0, "Y": 0, "Z": 0}
         # velocity
         self.velocity_reading: Dict[str, float] = {"X": 0, "Y": 0}
+
         self.setup_rvr()
 
     def setup_rvr(self) -> None:
@@ -129,14 +129,6 @@ class RVRDriver():
         rospy.loginfo("subscribers")
         self.create_ros_subscribers()
 
-        # create timer for driving callback
-        # self.timer = rospy.Timer(
-        #     rospy.Duration(self.CALLBACK_INTERVAL_DURATION), self.test_callback
-        # )
-        # create timer for sensor send callback
-        # self.sensor_pub_timer = rospy.Timer(
-        #     rospy.Duration(self.CALLBACK_INTERVAL_DURATION), self.sensor_pub_callback
-        # )
         # create timer for driving callback
         self.timer = rospy.Timer(
             rospy.Duration(
@@ -353,43 +345,9 @@ class RVRDriver():
         self.rvr.sensor_control.add_sensor_data_handler(
             service=RvrStreamingServices.velocity, handler=self.velocity_handler
         )
-        self.rvr.sensor_control.start(interval=self.SENSOR_STREAMING_INTERVAL)
 
-    # def test_callback(self, timer):
-    #     current_time = rospy.Time.now().secs
-    #     # update wheel speed if needed
-    #     if current_time > 0:
-    #         if self.latest_instruction == 0:
-    #             self.latest_instruction = current_time
-    #         elif current_time - self.latest_instruction > 2:
-    #             # change driving tread
-    #             self.speed_params = {
-    #                 k: abs(s - self.speed) for k, s in self.speed_params.items()
-    #             }
-    #             # update LEDs
-    #             # left
-    #             for led_id in self.LEFT_LEDS:
-    #                 self.led_settings[led_id] = (
-    #                     self.ACTIVE_COLOR
-    #                     if self.speed_params["left_velocity"] > 0
-    #                     else self.INACTIVE_COLOR
-    #                 )
-    #             # right
-    #             for led_id in self.RIGHT_LEDS:
-    #                 self.led_settings[led_id] = (
-    #                     self.ACTIVE_COLOR
-    #                     if self.speed_params["right_velocity"] > 0
-    #                     else self.INACTIVE_COLOR
-    #                 )
-    #             self.latest_instruction = current_time
-    #     # send speeds to API
-    #     self.rvr.drive_tank_si_units(
-    #         **self.speed_params, timeout=self.CALLBACK_INTERVAL_DURATION
-    #     )
-    #     # update led values
-    #     self.rvr.led_control.set_multiple_leds_with_enums(
-    #         leds=list(self.led_settings.keys()), colors=list(self.led_settings.values())
-    #     )
+        rospy.loginfo("sensor streaming on")
+        self.rvr.sensor_control.start(interval=self.SENSOR_STREAMING_INTERVAL)
 
     def publish_color(self) -> None:
         """Sends the stored ground color as an RGBA ROS message."""
@@ -524,17 +482,24 @@ class RVRDriver():
 
 # main
 if __name__ == "__main__":
-    try:
-        # init ROS node
-        rospy.init_node("rvr_driver")
+    # init ROS node
+    rospy.init_node("rvr_driver")
 
-        sensing_test = RVRDriver()
-        rospy.spin()
+    rvr_driver = RVRDriver()
 
-    except rospy.ROSInterruptException:
-        time.sleep(0.5)
-        sensing_test.rvr.led_control.turn_leds_off()
-        sensing_test.rvr.close()
-        rospy.loginfo("shutting rvr driver")
+    rospy.loginfo("rvr driver spin")
+    rospy.spin()
 
-        exit()
+    print("exitting")
+    time.sleep(0.5)
+    rvr_driver.rvr.led_control.turn_leds_off()
+    time.sleep(0.5)
+    print("leds off")
+    rvr_driver.rvr.sensor_control.stop()
+    time.sleep(0.5)
+    print("streaming off")
+    rvr_driver.rvr.close()
+    time.sleep(0.5)
+    print("shutting rvr conn")
+
+    exit()

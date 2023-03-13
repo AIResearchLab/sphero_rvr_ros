@@ -2,5 +2,10 @@
 <launch>
     <!-- python driver node -->
     <node pkg="sphero_rvr_driver" type="rvr_driver.py" name="rvr_driver" output="screen">
+        <remap from="~cmd_vel" to="/cmd_vel" />
+    </node>
+
+    <!-- mqtt fleet data logger -->
+    <node pkg="sphero_rvr_driver" type="mqtt_fleet_logger.py" name="rvr_fleet_logger" output="screen">
     </node>
 </launch>

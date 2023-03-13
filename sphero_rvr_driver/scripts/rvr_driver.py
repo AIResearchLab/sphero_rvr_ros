@@ -14,7 +14,15 @@ To stop the script, use Ctrl+C.
 """
 
 
-import time
+# rvr
+import asyncio
+from sphero_sdk import SpheroRvrAsync
+from sphero_sdk import SerialAsyncDal
+from sphero_sdk import RvrStreamingServices
+from sphero_sdk import RvrLedGroups
+from sphero_sdk import Colors
+
+# ros
 import rospy
 import itertools
 from typing import Dict, List, FrozenSet
@@ -24,49 +32,68 @@ from geometry_msgs.msg import Twist, Quaternion, Vector3
 from sensor_msgs.msg import Imu, Illuminance
 import tf_conversions
 from math import pi
-from sphero_sdk import RvrLedGroups
-from sphero_sdk import Colors
-from sphero_sdk.common.rvr_streaming_services import RvrStreamingServices
-from sphero_sdk import SpheroRvrObserver
+
+
+# a global rvr object
+loop = asyncio.get_event_loop()
+rvr = SpheroRvrAsync(
+    dal=SerialAsyncDal(
+        loop
+    )
+)
+
+
+async def blink_leds():
+    for i in range(0, 6):
+        # headlight leds on
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_left.value,
+            led_brightness_values=[255, 124, 0]
+        )
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_right.value,
+            led_brightness_values=[255, 124, 0]
+        )
+
+        await asyncio.sleep(0.2)
+
+        # headlight leds off
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_right.value,
+            led_brightness_values=[0, 0, 0]
+        )
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_left.value,
+            led_brightness_values=[0, 0, 0]
+        )
+
+        await asyncio.sleep(0.2)
 
 
 class RVRDriver():
-
-    # Loop settings
-    # main loop callback interval (seconds)
-    CALLBACK_INTERVAL_DURATION: float = 0.200
     # robot API sensor streaming interval (ms)
-    SENSOR_STREAMING_INTERVAL: int = 2 * int(CALLBACK_INTERVAL_DURATION * 1000)
+    SENSOR_STREAMING_INTERVAL: int = 2 * int(0.200 * 1000)
     # Wheel settings
 
     # speed in m/s
     speed: float = 0
 
     # LEDs settings
-    ACTIVE_COLOR: Colors = Colors.red
+    ACTIVE_COLOR: Colors = Colors.white
     INACTIVE_COLOR: Colors = Colors.off
-    BACK_COLOR: Colors = Colors.pink
-
-    LEFT_LEDS: FrozenSet[RvrLedGroups] = frozenset(
-        {
-            RvrLedGroups.headlight_left,
-            RvrLedGroups.battery_door_front,
-            RvrLedGroups.battery_door_rear,
-        }
-    )
-
-    RIGHT_LEDS: FrozenSet[RvrLedGroups] = frozenset(
-        {
-            RvrLedGroups.headlight_right,
-            RvrLedGroups.power_button_front,
-            RvrLedGroups.power_button_rear,
-        }
-    )
+    BACK_COLOR: Colors = Colors.red
 
     def __init__(self) -> None:
-        # init robot API connection
-        rospy.loginfo("Starting RVR API...")
-        self.rvr = SpheroRvrObserver()
+        # get ros params
+        # wheel base dimensions
+        self.radius = rospy.get_param("wheel_radius", 0.05)
+        self.separation = rospy.get_param("wheel_separation", 0.13)
+
+        # Loop settings
+        # main loop callback interval (seconds)
+        self.loop_hz = rospy.get_param("~loop_hz", 10.0)
+        self.loop_rate = rospy.Rate(self.loop_hz)
+
         # initial speed
         self.speed_params: Dict[str, float] = {
             "left_velocity": 0,
@@ -75,9 +102,9 @@ class RVRDriver():
         # initial LED settings
         self.led_settings: Dict[int, List[int]] = {
             # left headlight
-            RvrLedGroups.headlight_left: self.INACTIVE_COLOR.value,
+            RvrLedGroups.headlight_left: self.ACTIVE_COLOR.value,
             # right headlight
-            RvrLedGroups.headlight_right: self.INACTIVE_COLOR.value,
+            RvrLedGroups.headlight_right: self.ACTIVE_COLOR.value,
             # left side LED, left half
             RvrLedGroups.battery_door_front: self.INACTIVE_COLOR.value,
             # left side LED, right half
@@ -87,8 +114,8 @@ class RVRDriver():
             # right side LED, right half
             RvrLedGroups.power_button_rear: self.INACTIVE_COLOR.value,
             # back LED
-            RvrLedGroups.brakelight_left: self.INACTIVE_COLOR.value,
-            RvrLedGroups.brakelight_right: self.INACTIVE_COLOR.value,
+            RvrLedGroups.brakelight_left: self.BACK_COLOR.value,
+            RvrLedGroups.brakelight_right: self.BACK_COLOR.value,
         }
         # sensor values
         # battery
@@ -111,31 +138,27 @@ class RVRDriver():
         # velocity
         self.velocity_reading: Dict[str, float] = {"X": 0, "Y": 0}
 
-        self.setup_rvr()
-
-    def setup_rvr(self) -> None:
-        rospy.loginfo("Waking up RVR...")
-        self.rvr.wake()
-        rospy.loginfo("Waking up RVR... Done")
-        time.sleep(2)
-
-        self.rvr.reset_yaw()
-        self.rvr.led_control.turn_leds_off()
-
         rospy.loginfo("setting things up...")
-        self.enable_sensors()
         rospy.loginfo("publishers")
-        self.create_ros_publishers()
-        rospy.loginfo("subscribers")
-        self.create_ros_subscribers()
-
-        # create timer for driving callback
-        self.timer = rospy.Timer(
-            rospy.Duration(
-                self.CALLBACK_INTERVAL_DURATION), self.driving_callback
+        # Ground color as RGB
+        self.ground_color_pub = rospy.Publisher(
+            "~ground_color", ColorRGBA, queue_size=2
         )
+        # IMU message includes :
+        # - imu orientation
+        # - gyroscope velocities
+        # - linear acceleration
+        self.imu_pub = rospy.Publisher("~imu", Imu, queue_size=2)
+        # Ambient light
+        self.light_pub = rospy.Publisher(
+            "~ambient_light", Illuminance, queue_size=2
+        )
+        # Odometry message includes :
+        # - Pose : position (locator) and orientation (quaternion)
+        # - Twist : angular (gyro) and linear (velocity) velocities
+        self.odom_pub = rospy.Publisher("~odom", Odometry, queue_size=2)
 
-    def create_ros_subscribers(self) -> None:
+        rospy.loginfo("subscribers")
         # wheels speed subscriber
         self.wheel_sub = rospy.Subscriber(
             "~wheels/speed",
@@ -163,109 +186,117 @@ class RVRDriver():
 
         # XXX TODO: add the other leds for the side panels
 
-    def create_ros_publishers(self) -> None:
-        # Ground color as RGB
-        self.ground_color_pub = rospy.Publisher(
-            "~ground_color", ColorRGBA, queue_size=10
-        )
-        # IMU message includes :
-        # - imu orientation
-        # - gyroscope velocities
-        # - linear acceleration
-        self.imu_pub = rospy.Publisher("~imu", Imu, queue_size=10)
-        # Ambient light
-        self.light_pub = rospy.Publisher(
-            "~ambient_light", Illuminance, queue_size=10
-        )
-        # Odometry message includes :
-        # - Pose : position (locator) and orientation (quaternion)
-        # - Twist : angular (gyro) and linear (velocity) velocities
-        self.odom_pub = rospy.Publisher("~odom", Odometry, queue_size=10)
+    async def rvr_loop(self):
+        try:
+            print("waking rvr")
+            await rvr.wake()
 
-    def wheels_speed_callback(self, msg: Float32MultiArray) -> None:
-        """
-        Callback for wheels speed subscriber.
-        """
-        print(msg.data)
-        self.speed_params["left_velocity"] = round(msg.data[0], 2)
-        self.speed_params["right_velocity"] = round(msg.data[1], 2)
+            # Give RVR time to wake up
+            await asyncio.sleep(2)
+            print("rvr connected")
 
-    def cmd_vel_cb(self, msg: Twist):
-        # safety constraints
-        x = self.constrain(
-            msg.linear.x, -1.0, 1.0)
-        yaw = self.constrain(
-            msg.angular.z, -6.0, 6.0)
+            # lights off
+            await rvr.led_control.turn_leds_off()
 
-        # apply x velocity evenly
-        # apply yaw on top with kinematic model
-        self.speed_params["left_velocity"] = x - \
-            (yaw * self.separation / 2.0) / self.radius
+            # lights blinking
+            print("blink LEDS")
+            await blink_leds()
 
-        self.speed_params["right_velocity"] = x + \
-            (yaw * self.separation / 2.0) / self.radius
+            print("Enabling sensors...")
+            rvr.enable_color_detection(is_enabled=True)
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.accelerometer,
+                handler=self.accelerometer_handler,
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.color_detection,
+                handler=self.ground_sensor_handler,
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.gyroscope, handler=self.gyroscope_handler
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.imu, handler=self.imu_handler
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.ambient_light, handler=self.light_handler
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.locator, handler=self.locator_handler
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.quaternion, handler=self.quaternion_handler
+            )
+            rvr.sensor_control.add_sensor_data_handler(
+                service=RvrStreamingServices.velocity, handler=self.velocity_handler
+            )
 
-        # round
-        self.speed_params["left_velocity"] = round(
-            self.speed_params["left_velocity"], 2)
+            print("sensor streaming on")
+            await rvr.sensor_control.start(interval=250)
 
-        self.speed_params["right_velocity"] = round(
-            self.speed_params["right_velocity"], 2)
+            await rvr.reset_yaw()
 
-    """Callback for rgb leds subscriber."""
+            # front lights green
+            await rvr.set_all_leds(
+                led_group=RvrLedGroups.headlight_left.value,
+                led_brightness_values=[0, 255, 0]
+            )
+            await rvr.set_all_leds(
+                led_group=RvrLedGroups.headlight_right.value,
+                led_brightness_values=[0, 255, 0]
+            )
 
-    def headlight_left_led_cb(self, msg: ColorRGBA) -> None:
-        # left headlight
-        self.led_settings[RvrLedGroups.headlight_left] = [
-            int(msg.r),
-            int(msg.g),
-            int(msg.b),
-        ]
+            await asyncio.sleep(2)
 
-    def headlight_right_led_cb(self, msg: ColorRGBA) -> None:
-        # right headlight
-        self.led_settings[RvrLedGroups.headlight_right] = [
-            int(msg.r),
-            int(msg.g),
-            int(msg.b),
-        ]
+            while not rospy.is_shutdown():
 
-    def brake_left_led_cb(self, msg: ColorRGBA) -> None:
-        # # left side LED, both battery doors
-        # self.led_settings[RvrLedGroups.battery_door_front] = [
-        #     int(msg.left_color.r),
-        #     int(msg.left_color.g),
-        #     int(msg.left_color.b),
-        # ]
-        # self.led_settings[RvrLedGroups.battery_door_rear] = [
-        #     int(msg.left_color.r),
-        #     int(msg.left_color.g),
-        #     int(msg.left_color.b),
-        # ]
-        # # right side LED, both power buttons
-        # self.led_settings[RvrLedGroups.power_button_front] = [
-        #     int(msg.right_color.r),
-        #     int(msg.right_color.g),
-        #     int(msg.right_color.b),
-        # ]
-        # self.led_settings[RvrLedGroups.power_button_rear] = [
-        #     int(msg.right_color.r),
-        #     int(msg.right_color.g),
-        #     int(msg.right_color.b),
-        # ]
-        # back LED
-        self.led_settings[RvrLedGroups.brakelight_left] = [
-            int(msg.r),
-            int(msg.g),
-            int(msg.b),
-        ]
+                # ambient light response on sides
+                side_colour = Colors.white.value - int(
+                    Colors.white.value * max((self.ambient_light / 1000.0), 1.0))
+                self.led_settings[RvrLedGroups.battery_door_front] = side_colour
+                self.led_settings[RvrLedGroups.battery_door_rear] = side_colour
+                self.led_settings[RvrLedGroups.power_button_front] = side_colour
+                self.led_settings[RvrLedGroups.power_button_rear] = side_colour
 
-    def brake_right_led_cb(self, msg: ColorRGBA) -> None:
-        self.led_settings[RvrLedGroups.brakelight_right] = [
-            int(msg.r),
-            int(msg.g),
-            int(msg.b),
-        ]
+                # apply led values
+                await rvr.led_control.set_multiple_leds_with_rgb(
+                    leds=list(self.led_settings.keys()),
+                    colors=list(itertools.chain(
+                        *self.led_settings.values())),
+                )
+
+                # calculate the needed commands
+                [dl, l, dr, r] = self.calculate_wheel_commands()
+
+                # apply motor command values
+                await rvr.raw_motors(
+                    dl,
+                    l,
+                    dr,
+                    r,
+                    timeout=1.0 / self.loop_hz
+                )
+
+                # publish data
+                self.publish_color()
+                self.publish_imu()
+                self.publish_light()
+                self.publish_odom()
+
+                # spin once
+                self.loop_rate.sleep()
+                # rospy.spin()
+
+        except Exception as e:
+            print(e)
+
+        finally:
+            await rvr.sensor_control.clear()
+            await asyncio.sleep(0.5)
+            await rvr.close()
+            # Delay to allow RVR issue command before closing
+            await asyncio.sleep(0.5)
+            print("exitting")
 
     """ Robot Handlers """
 
@@ -316,38 +347,7 @@ class RVRDriver():
             for k in self.velocity_reading.keys() & data["Velocity"].keys()
         )
 
-    def enable_sensors(self) -> None:
-        rospy.loginfo("Enabling sensors...")
-        self.rvr.enable_color_detection(is_enabled=True)
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.accelerometer,
-            handler=self.accelerometer_handler,
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.color_detection,
-            handler=self.ground_sensor_handler,
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.gyroscope, handler=self.gyroscope_handler
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.imu, handler=self.imu_handler
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.ambient_light, handler=self.light_handler
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.locator, handler=self.locator_handler
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.quaternion, handler=self.quaternion_handler
-        )
-        self.rvr.sensor_control.add_sensor_data_handler(
-            service=RvrStreamingServices.velocity, handler=self.velocity_handler
-        )
-
-        rospy.loginfo("sensor streaming on")
-        self.rvr.sensor_control.start(interval=self.SENSOR_STREAMING_INTERVAL)
+    ''' ros publishers '''
 
     def publish_color(self) -> None:
         """Sends the stored ground color as an RGBA ROS message."""
@@ -415,27 +415,74 @@ class RVRDriver():
         )
         self.odom_pub.publish(odom_msg)
 
-    # def sensor_pub_callback(self, timer):
-    #     self.publish_info()
+    ''' ros subscriber callbacks '''
 
-    def publish_info(self):
-        self.publish_color()
-        self.publish_imu()
-        self.publish_light()
-        self.publish_odom()
+    def wheels_speed_callback(self, msg: Float32MultiArray) -> None:
+        """
+        Callback for wheels speed subscriber.
+        """
+        print(msg.data)
+        self.speed_params["left_velocity"] = round(msg.data[0], 2)
+        self.speed_params["right_velocity"] = round(msg.data[1], 2)
 
-    def driving_callback(self, timer):
-        self.publish_info()
-        self.apply_actuators()
+    def cmd_vel_cb(self, msg: Twist):
+        # safety constraints
+        x = self.constrain(
+            msg.linear.x, -1.0, 1.0)
+        yaw = self.constrain(
+            msg.angular.z, -6.0, 6.0)
 
-    def apply_actuators(self):
-        """Applies the stored actuator values to the robot."""
-        # print(self.led_settings)
-        self.rvr.led_control.set_multiple_leds_with_rgb(
-            leds=list(self.led_settings.keys()),
-            colors=list(itertools.chain(*self.led_settings.values())),
-        )
+        # apply x velocity evenly
+        # apply yaw on top with kinematic model
+        self.speed_params["left_velocity"] = x - \
+            (yaw * self.separation / 2.0) / self.radius
 
+        self.speed_params["right_velocity"] = x + \
+            (yaw * self.separation / 2.0) / self.radius
+
+        # round
+        self.speed_params["left_velocity"] = round(
+            self.speed_params["left_velocity"], 2)
+
+        self.speed_params["right_velocity"] = round(
+            self.speed_params["right_velocity"], 2)
+
+    # leds
+
+    def headlight_left_led_cb(self, msg: ColorRGBA) -> None:
+        # left headlight
+        self.led_settings[RvrLedGroups.headlight_left] = [
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
+        ]
+
+    def headlight_right_led_cb(self, msg: ColorRGBA) -> None:
+        # right headlight
+        self.led_settings[RvrLedGroups.headlight_right] = [
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
+        ]
+
+    def brake_left_led_cb(self, msg: ColorRGBA) -> None:
+        # back LED
+        self.led_settings[RvrLedGroups.brakelight_left] = [
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
+        ]
+
+    def brake_right_led_cb(self, msg: ColorRGBA) -> None:
+        self.led_settings[RvrLedGroups.brakelight_right] = [
+            int(msg.r),
+            int(msg.g),
+            int(msg.b),
+        ]
+
+    ''' helpers '''
+
+    def calculate_wheel_commands(self):
         # get magnitude
         l = abs(self.speed_params["left_velocity"])
         r = abs(self.speed_params["right_velocity"])
@@ -467,14 +514,7 @@ class RVRDriver():
             r = 0
             dr = 0
 
-        # send motor command
-        self.rvr.raw_motors(
-            dl,
-            l,
-            dr,
-            r,
-            timeout=self.CALLBACK_INTERVAL_DURATION
-        )
+        return [dl, l, dr, r]
 
     def constrain(val, min_val, max_val):
         return min(max_val, max(min_val, val))
@@ -487,19 +527,11 @@ if __name__ == "__main__":
 
     rvr_driver = RVRDriver()
 
-    rospy.loginfo("rvr driver spin")
-    rospy.spin()
+    # rvr loop
+    loop.run_until_complete(
+        asyncio.gather(
+            rvr_driver.rvr_loop()
+        )
+    )
 
-    print("exitting")
-    time.sleep(0.5)
-    rvr_driver.rvr.led_control.turn_leds_off()
-    time.sleep(0.5)
-    print("leds off")
-    rvr_driver.rvr.sensor_control.stop()
-    time.sleep(0.5)
-    print("streaming off")
-    rvr_driver.rvr.close()
-    time.sleep(0.5)
-    print("shutting rvr conn")
-
-    exit()
+    print("exit rvr driver")

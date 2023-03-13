@@ -425,9 +425,9 @@ class RVRDriver():
 
     def cmd_vel_cb(self, msg: Twist):
         # safety constraints
-        x = self.constrain(
+        x = RVRDriver.constrain(
             msg.linear.x, -1.0, 1.0)
-        yaw = self.constrain(
+        yaw = RVRDriver.constrain(
             msg.angular.z, -6.0, 6.0)
 
         # apply x velocity evenly

@@ -251,8 +251,10 @@ class RVRDriver():
             while not rospy.is_shutdown():
 
                 # ambient light response on sides
-                side_colour = Colors.white.value - int(
-                    Colors.white.value * max((self.ambient_light / 1000.0), 1.0))
+                colour_scaler = int(
+                    255.0 * max((self.ambient_light / 1000.0), 1.0))
+                side_colour = Colors.white.value - colour_scaler
+
                 self.led_settings[RvrLedGroups.battery_door_front] = side_colour
                 self.led_settings[RvrLedGroups.battery_door_rear] = side_colour
                 self.led_settings[RvrLedGroups.power_button_front] = side_colour

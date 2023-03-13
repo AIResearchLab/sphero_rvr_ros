@@ -21,6 +21,7 @@ from sphero_sdk import SerialAsyncDal
 from sphero_sdk import RvrStreamingServices
 from sphero_sdk import RvrLedGroups
 from sphero_sdk import Colors
+from sphero_sdk.common.enums.drive_enums import DriveFlagsBitmask
 
 # ros
 import rospy
@@ -84,7 +85,7 @@ class RVRDriver():
         # wheel base dimensions
         self.radius = rospy.get_param("wheel_radius", 0.05)
         self.separation = rospy.get_param("wheel_separation", 0.13)
-        self.limit_linear = rospy.get_param("linear_vel_limit", 1.0)
+        self.limit_linear = rospy.get_param("linear_vel_limit", 1.2)
         self.limit_angular = rospy.get_param("angular_vel_limit", 6.0)
 
         # Loop settings
@@ -94,11 +95,15 @@ class RVRDriver():
 
         # speed in m/s
         self.speed: float = 0
+        self.heading: float = 0
+        self.led_set_time = True
 
         # initial speed
         self.speed_params: Dict[str, float] = {
             "left_velocity": 0,
             "right_velocity": 0,
+            "yaw": 0,
+            "speed": 0
         }
         # initial LED settings
         self.led_settings: Dict[int, List[int]] = {
@@ -173,6 +178,48 @@ class RVRDriver():
         self.led_bl_sub = rospy.Subscriber("~led/brake", ColorRGBA,
                                            self.brake_led_cb, queue_size=1)
 
+        # ros timers
+        self.pub_timer = rospy.Timer(
+            rospy.Duration(0.5), self.publish_timer_cb)
+
+    async def apply_leds(self):
+        # apply led values to headlights
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_left.value,
+            led_brightness_values=self.led_settings[RvrLedGroups.headlight_left],
+        )
+        await rvr.set_all_leds(
+            led_group=RvrLedGroups.headlight_right.value,
+            led_brightness_values=self.led_settings[RvrLedGroups.headlight_right],
+        )
+        await asyncio.sleep(0.1)
+        # apply led values to sides
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.battery_door_front.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.battery_door_front],
+        # )
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.battery_door_rear.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.battery_door_rear],
+        # )
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.power_button_front.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.power_button_front],
+        # )
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.power_button_rear.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.power_button_rear],
+        # )
+        # # apply led values to brakes
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.brakelight_left.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.brakelight_left],
+        # )
+        # await rvr.set_all_leds(
+        #     led_group=RvrLedGroups.brakelight_right.value,
+        #     led_brightness_values=self.led_settings[RvrLedGroups.brakelight_right]
+        # )
+
     async def rvr_loop(self):
         try:
             print("waking rvr")
@@ -241,53 +288,29 @@ class RVRDriver():
 
             while not rospy.is_shutdown():
 
-                self.calculate_side_panel_brightness()
-
-                # apply led values to sides
-                # apply led values to headlights
-                # apply led values to brakes
-                # await rvr.led_control.set_multiple_leds_with_rgb(
-                #     leds=[
-                #         RvrLedGroups.headlight_left,
-                #         RvrLedGroups.headlight_right,
-                #         RvrLedGroups.battery_door_front,
-                #         RvrLedGroups.battery_door_rear,
-                #         RvrLedGroups.power_button_front,
-                #         RvrLedGroups.power_button_rear,
-                #         RvrLedGroups.brakelight_left,
-                #         RvrLedGroups.brakelight_right
-                #     ],
-                #     colors=[
-                #         self.led_settings[RvrLedGroups.headlight_left],
-                #         self.led_settings[RvrLedGroups.headlight_right],
-                #         self.led_settings[RvrLedGroups.battery_door_front],
-                #         self.led_settings[RvrLedGroups.battery_door_rear],
-                #         self.led_settings[RvrLedGroups.power_button_front],
-                #         self.led_settings[RvrLedGroups.power_button_rear],
-                #         self.led_settings[RvrLedGroups.brakelight_left],
-                #         self.led_settings[RvrLedGroups.brakelight_right]
-                #     ]
-                # )
+                # apply all led values
+                if self.led_set_time:
+                    self.calculate_side_panel_brightness()
+                    await self.apply_leds()
+                    self.led_set_time = False
 
                 # calculate the needed commands
-                [dl, l, dr, r] = self.calculate_wheel_commands()
-                print([dl, l, dr, r])
+                # [dl, l, dr, r] = self.calculate_wheel_commands()
+                # print([dl, l, dr, r])
+                [d, s, h] = self.calculate_speed_and_heading()
+                print([d, s, h])
+
+                # new heading
+                self.heading += h
+                # handle roll over
+                self.heading = self.heading % 360
+                # handle negative heading
+                if self.heading < 0:
+                    self.heading = 360 - self.heading
 
                 # apply motor command values
-                await rvr.raw_motors(
-                    dl,
-                    l,
-                    dr,
-                    r,
-                    timeout=1.0 / self.loop_hz
-                )
-
-                # publish data
-                self.publish_color()
-                self.publish_imu()
-                self.publish_light()
-                self.publish_odom()
-                self.speed_pub.publish(self.speed)
+                await rvr.drive_with_heading(s, self.heading, d)
+                await asyncio.sleep(0.1)
 
                 # spin once
                 self.loop_rate.sleep()
@@ -354,6 +377,16 @@ class RVRDriver():
             (k, data["Velocity"][k])
             for k in self.velocity_reading.keys() & data["Velocity"].keys()
         )
+
+    ''' ros timers '''
+
+    def publish_timer_cb(self, event):
+        # publish data
+        self.publish_color()
+        self.publish_imu()
+        self.publish_light()
+        self.publish_odom()
+        self.speed_pub.publish(self.speed)
 
     ''' ros publishers '''
 
@@ -432,6 +465,10 @@ class RVRDriver():
         yaw = RVRDriver.constrain(
             msg.angular.z, -self.limit_angular, self.limit_angular)
 
+        # store lin and ang vel
+        self.speed_params["speed"] = x
+        self.speed_params["yaw"] = yaw
+
         # apply x velocity evenly
         # apply yaw on top with kinematic model
         self.speed_params["left_velocity"] = x - \
@@ -439,13 +476,6 @@ class RVRDriver():
 
         self.speed_params["right_velocity"] = x + \
             (yaw * self.separation / 2.0) / self.radius
-
-        # round
-        self.speed_params["left_velocity"] = round(
-            self.speed_params["left_velocity"], 2)
-
-        self.speed_params["right_velocity"] = round(
-            self.speed_params["right_velocity"], 2)
 
     # leds
 
@@ -491,6 +521,25 @@ class RVRDriver():
         self.led_settings[RvrLedGroups.power_button_front] = side_colour
         self.led_settings[RvrLedGroups.power_button_rear] = side_colour
 
+    def calculate_speed_and_heading(self):
+        d = 0
+
+        s = self.speed_params["speed"]
+
+        if s < 0.0:
+            d = DriveFlagsBitmask.drive_reverse
+
+        h = self.speed_params["yaw"] * self.loop_rate.sleep_dur.to_sec()
+
+        # scale values
+        s = int(abs(255.0 * s / self.limit_linear))
+        h = int(h * 180.0 / pi)
+
+        # inverted direction
+        h = -h
+
+        return [d, s, h]
+
     def calculate_wheel_commands(self):
         # get magnitude
         l = abs(self.speed_params["left_velocity"])
@@ -517,7 +566,7 @@ class RVRDriver():
         r = int(255 * (r / max_wheel_speed))
 
         # apply a deadzone
-        deadzone = 25
+        deadzone = 60
         if l < deadzone and r < deadzone:
             l = 0
             dl = 0

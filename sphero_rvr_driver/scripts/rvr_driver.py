@@ -87,7 +87,7 @@ class RVRDriver():
 
         # Loop settings
         # main loop callback interval (seconds)
-        self.loop_hz = rospy.get_param("~loop_hz", 10.0)
+        self.loop_hz = rospy.get_param("~loop_hz", 5.0)
         self.loop_rate = rospy.Rate(self.loop_hz)
 
         # speed in m/s
@@ -269,6 +269,7 @@ class RVRDriver():
 
                 # calculate the needed commands
                 [dl, l, dr, r] = self.calculate_wheel_commands()
+                print([dl, l, dr, r])
 
                 # apply motor command values
                 await rvr.raw_motors(

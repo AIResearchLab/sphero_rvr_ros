@@ -203,31 +203,31 @@ class RVRDriver():
             await blink_leds()
 
             print("Enabling sensors...")
-            rvr.enable_color_detection(is_enabled=True)
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.enable_color_detection(is_enabled=True)
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.accelerometer,
                 handler=self.accelerometer_handler,
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.color_detection,
                 handler=self.ground_sensor_handler,
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.gyroscope, handler=self.gyroscope_handler
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.imu, handler=self.imu_handler
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.ambient_light, handler=self.light_handler
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.locator, handler=self.locator_handler
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.quaternion, handler=self.quaternion_handler
             )
-            rvr.sensor_control.add_sensor_data_handler(
+            await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.velocity, handler=self.velocity_handler
             )
 

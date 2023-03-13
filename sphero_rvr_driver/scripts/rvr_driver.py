@@ -253,7 +253,8 @@ class RVRDriver():
                 # ambient light response on sides
                 colour_scaler = int(
                     255.0 * max((self.ambient_light / 1000.0), 1.0))
-                side_colour = Colors.white.value - colour_scaler
+                side_colour = Colors.white.value
+                side_colour = [*map(lambda x: x - colour_scaler, side_colour)]
 
                 self.led_settings[RvrLedGroups.battery_door_front] = side_colour
                 self.led_settings[RvrLedGroups.battery_door_rear] = side_colour

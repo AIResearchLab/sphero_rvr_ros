@@ -84,6 +84,8 @@ class RVRDriver():
         # wheel base dimensions
         self.radius = rospy.get_param("wheel_radius", 0.05)
         self.separation = rospy.get_param("wheel_separation", 0.13)
+        self.limit_linear = rospy.get_param("linear_vel_limit", 1.0)
+        self.limit_angular = rospy.get_param("angular_vel_limit", 6.0)
 
         # Loop settings
         # main loop callback interval (seconds)
@@ -426,9 +428,9 @@ class RVRDriver():
     def cmd_vel_cb(self, msg: Twist):
         # safety constraints
         x = RVRDriver.constrain(
-            msg.linear.x, -1.0, 1.0)
+            msg.linear.x, -self.limit_linear, self.limit_linear)
         yaw = RVRDriver.constrain(
-            msg.angular.z, -6.0, 6.0)
+            msg.angular.z, -self.limit_angular, self.limit_angular)
 
         # apply x velocity evenly
         # apply yaw on top with kinematic model
@@ -509,7 +511,8 @@ class RVRDriver():
                 dr = 2
 
         # scale values into motor space
-        max_wheel_speed = 6.0
+        max_wheel_speed = self.limit_linear + \
+            (self.limit_angular * self.separation / 2.0) / self.radius
         l = int(255 * (l / max_wheel_speed))
         r = int(255 * (r / max_wheel_speed))
 

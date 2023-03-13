@@ -311,7 +311,7 @@ class RVRDriver():
             for k in self.accelerometer_reading.keys() & data["Accelerometer"].keys()
         )
 
-    def accelerometer_handler(self, data: Dict[str, Dict[str, float]]) -> None:
+    def speed_handler(self, data: Dict[str, Dict[str, float]]) -> None:
         self.speed = data['Speed']['Speed']
 
     def ground_sensor_handler(self, data: Dict[str, Dict[str, float]]) -> None:

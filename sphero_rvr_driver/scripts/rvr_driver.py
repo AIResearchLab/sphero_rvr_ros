@@ -244,28 +244,28 @@ class RVRDriver():
                 # apply led values to sides
                 # apply led values to headlights
                 # apply led values to brakes
-                await rvr.led_control.set_multiple_leds_with_rgb(
-                    leds=[
-                        RvrLedGroups.headlight_left,
-                        RvrLedGroups.headlight_right,
-                        RvrLedGroups.battery_door_front,
-                        RvrLedGroups.battery_door_rear,
-                        RvrLedGroups.power_button_front,
-                        RvrLedGroups.power_button_rear,
-                        RvrLedGroups.brakelight_left,
-                        RvrLedGroups.brakelight_right
-                    ],
-                    colors=[
-                        self.led_settings[RvrLedGroups.headlight_left],
-                        self.led_settings[RvrLedGroups.headlight_right],
-                        self.led_settings[RvrLedGroups.battery_door_front],
-                        self.led_settings[RvrLedGroups.battery_door_rear],
-                        self.led_settings[RvrLedGroups.power_button_front],
-                        self.led_settings[RvrLedGroups.power_button_rear],
-                        self.led_settings[RvrLedGroups.brakelight_left],
-                        self.led_settings[RvrLedGroups.brakelight_right]
-                    ]
-                )
+                # await rvr.led_control.set_multiple_leds_with_rgb(
+                #     leds=[
+                #         RvrLedGroups.headlight_left,
+                #         RvrLedGroups.headlight_right,
+                #         RvrLedGroups.battery_door_front,
+                #         RvrLedGroups.battery_door_rear,
+                #         RvrLedGroups.power_button_front,
+                #         RvrLedGroups.power_button_rear,
+                #         RvrLedGroups.brakelight_left,
+                #         RvrLedGroups.brakelight_right
+                #     ],
+                #     colors=[
+                #         self.led_settings[RvrLedGroups.headlight_left],
+                #         self.led_settings[RvrLedGroups.headlight_right],
+                #         self.led_settings[RvrLedGroups.battery_door_front],
+                #         self.led_settings[RvrLedGroups.battery_door_rear],
+                #         self.led_settings[RvrLedGroups.power_button_front],
+                #         self.led_settings[RvrLedGroups.power_button_rear],
+                #         self.led_settings[RvrLedGroups.brakelight_left],
+                #         self.led_settings[RvrLedGroups.brakelight_right]
+                #     ]
+                # )
 
                 # calculate the needed commands
                 [dl, l, dr, r] = self.calculate_wheel_commands()

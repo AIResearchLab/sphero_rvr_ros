@@ -88,44 +88,45 @@ if __name__ == '__main__':
     rate = rospy.Rate(10.0)
 
     try:
-        if blink_enabled:
-            # blink LEDS
-            print("blink leds command activated!")
+        while not rospy.is_shutdown():
+            if blink_enabled:
+                # blink LEDS
+                print("blink leds command activated!")
 
-            rgb = ColorRGBA()
-            rgb.a = 1.0
-            rgb.b = 0.0
+                rgb = ColorRGBA()
+                rgb.a = 1.0
+                rgb.b = 0.0
 
-            for i in range(0, 6):
-                rgb.r = 0.5
-                rgb.g = 0.25
-                led_pub.publish(rgb)
-                time.sleep(0.2)
+                for i in range(0, 6):
+                    rgb.r = 0.5
+                    rgb.g = 0.25
+                    led_pub.publish(rgb)
+                    time.sleep(0.2)
 
+                    rgb.r = 0.0
+                    rgb.g = 0.0
+                    led_pub.publish(rgb)
+                    time.sleep(0.2)
+
+                blink_enabled = 0
+                print("blink leds command done!")
+
+            if green_enabled:
+                # green LEDS
+                print("green leds command activated!")
+                rgb = ColorRGBA()
                 rgb.r = 0.0
-                rgb.g = 0.0
+                rgb.g = 1.0
+                rgb.b = 0.0
+                rgb.a = 1.0
+
                 led_pub.publish(rgb)
-                time.sleep(0.2)
+                green_enabled = 0
 
-            blink_enabled = 0
-            print("blink leds command done!")
+                print("green leds command done!")
 
-        if green_enabled:
-            # green LEDS
-            print("green leds command activated!")
-            rgb = ColorRGBA()
-            rgb.r = 0.0
-            rgb.g = 1.0
-            rgb.b = 0.0
-            rgb.a = 1.0
-
-            led_pub.publish(rgb)
-            green_enabled = 0
-
-            print("green leds command done!")
-
-        # rospy.spin()
-        rate.sleep()
+            # rospy.spin()
+            rate.sleep()
 
     except Exception as e:
         print(e)

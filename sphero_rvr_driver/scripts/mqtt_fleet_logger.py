@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 print("blink leds command activated!")
 
                 # send service
-                blink_srv(Empty())
+                blink_srv()
 
                 # rgb = ColorRGBA()
                 # rgb.a = 1.0
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                 # green LEDS
                 print("green leds command activated!")
                 # send service
-                green_srv(Empty())
+                green_srv()
 
                 # rgb = ColorRGBA()
                 # rgb.r = 0.0

@@ -4,6 +4,7 @@ import time
 import rospy
 from std_msgs.msg import Float32
 from std_msgs.msg import ColorRGBA
+from std_srvs.srv import Empty
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 
@@ -85,6 +86,10 @@ if __name__ == '__main__':
     client.subscribe(LED_BLINK_TOPIC)
     client.subscribe(LED_GREEN_TOPIC)
 
+    # service proxyies
+    blink_srv = rospy.ServiceProxy("/rvr_driver/blink", Empty)
+    green_srv = rospy.ServiceProxy("/rvr_driver/green", Empty)
+
     rate = rospy.Rate(10.0)
 
     try:
@@ -93,20 +98,21 @@ if __name__ == '__main__':
                 # blink LEDS
                 print("blink leds command activated!")
 
-                rgb = ColorRGBA()
-                rgb.a = 1.0
-                rgb.b = 0.0
+                # send service
+                blink_srv(Empty())
 
-                for i in range(0, 6):
-                    rgb.r = 0.5
-                    rgb.g = 0.25
-                    led_pub.publish(rgb)
-                    time.sleep(0.2)
-
-                    rgb.r = 0.0
-                    rgb.g = 0.0
-                    led_pub.publish(rgb)
-                    time.sleep(0.2)
+                # rgb = ColorRGBA()
+                # rgb.a = 1.0
+                # rgb.b = 0.0
+                # for i in range(0, 6):
+                #     rgb.r = 0.5
+                #     rgb.g = 0.25
+                #     led_pub.publish(rgb)
+                #     time.sleep(0.2)
+                #     rgb.r = 0.0
+                #     rgb.g = 0.0
+                #     led_pub.publish(rgb)
+                #     time.sleep(0.2)
 
                 blink_enabled = 0
                 print("blink leds command done!")
@@ -114,13 +120,16 @@ if __name__ == '__main__':
             if green_enabled:
                 # green LEDS
                 print("green leds command activated!")
-                rgb = ColorRGBA()
-                rgb.r = 0.0
-                rgb.g = 1.0
-                rgb.b = 0.0
-                rgb.a = 1.0
+                # send service
+                green_srv(Empty())
 
-                led_pub.publish(rgb)
+                # rgb = ColorRGBA()
+                # rgb.r = 0.0
+                # rgb.g = 1.0
+                # rgb.b = 0.0
+                # rgb.a = 1.0
+                # led_pub.publish(rgb)
+
                 green_enabled = 0
 
                 print("green leds command done!")

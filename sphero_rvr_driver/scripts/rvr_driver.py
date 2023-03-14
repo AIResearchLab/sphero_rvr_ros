@@ -28,6 +28,7 @@ import rospy
 from typing import Dict, List
 from std_msgs.msg import Float32
 from std_msgs.msg import ColorRGBA
+from std_srvs.srv import Empty
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Quaternion, Vector3
 from sensor_msgs.msg import Imu, Illuminance
@@ -69,6 +70,18 @@ async def blink_leds():
         )
 
         await asyncio.sleep(0.2)
+
+
+async def set_headlights_green():
+    # front lights green
+    await rvr.set_all_leds(
+        led_group=RvrLedGroups.headlight_left.value,
+        led_brightness_values=[0, 255, 0]
+    )
+    await rvr.set_all_leds(
+        led_group=RvrLedGroups.headlight_right.value,
+        led_brightness_values=[0, 255, 0]
+    )
 
 
 class RVRDriver():
@@ -182,6 +195,20 @@ class RVRDriver():
         self.pub_timer = rospy.Timer(
             rospy.Duration(0.5), self.publish_timer_cb)
 
+        # ros services
+        self.blink_enabled=0
+        self.green_enabled=0
+        self.blink_service = rospy.Service("~blink", Empty, self.blink_srv_cb)
+        self.blink_service = rospy.Service("~green", Empty, self.green_srv_cb)
+
+    def blink_srv_cb(self, req):
+        self.blink_enabled = 1
+        return
+
+    def green_srv_cb(self, req):
+        self.green_enabled = 1
+        return
+
     async def apply_leds(self):
         # apply led values to headlights
         await rvr.set_all_leds(
@@ -289,10 +316,26 @@ class RVRDriver():
             while not rospy.is_shutdown():
 
                 # apply all led values
-                if self.led_set_time:
-                    self.calculate_side_panel_brightness()
-                    await self.apply_leds()
-                    self.led_set_time = False
+                # if self.led_set_time:
+                #     self.calculate_side_panel_brightness()
+                #     await self.apply_leds()
+                #     self.led_set_time = False
+
+                if self.blink_enabled:
+                    # blink LEDS
+                    print("blink leds command activated!")
+                    await blink_leds()
+                    self.blink_enabled = 0
+                    asyncio.sleep(1.0)
+                    print("blink leds command done!")
+
+                if self.green_enabled:
+                    # green LEDS
+                    print("green leds command activated!")
+                    await set_headlights_green()
+                    self.green_enabled = 0
+                    asyncio.sleep(1.0)
+                    print("green leds command done!")
 
                 # calculate the needed commands
                 # [dl, l, dr, r] = self.calculate_wheel_commands()

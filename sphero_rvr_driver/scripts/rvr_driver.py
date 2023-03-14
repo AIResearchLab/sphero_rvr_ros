@@ -334,6 +334,8 @@ class RVRDriver():
                     print("green leds command activated!")
                     await set_headlights_green()
                     self.green_enabled = 0
+                    await asyncio.sleep(5.0)
+                    await rvr.led_control.turn_leds_off()
                     await asyncio.sleep(1.0)
                     print("green leds command done!")
 

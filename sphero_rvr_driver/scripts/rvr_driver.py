@@ -322,21 +322,29 @@ class RVRDriver():
                 #     self.led_set_time = False
 
                 if self.blink_enabled:
+                    # turn off speed
+                    await rvr.drive_with_heading(0, self.heading, 0)
+                    await asyncio.sleep(0.1)
+
                     # blink LEDS
                     print("blink leds command activated!")
                     await blink_leds()
                     self.blink_enabled = 0
-                    await asyncio.sleep(1.0)
+                    await asyncio.sleep(0.1)
                     print("blink leds command done!")
 
                 if self.green_enabled:
+                    # turn off speed
+                    await rvr.drive_with_heading(0, self.heading, 0)
+                    await asyncio.sleep(0.1)
+
                     # green LEDS
                     print("green leds command activated!")
                     await set_headlights_green()
                     self.green_enabled = 0
                     await asyncio.sleep(5.0)
                     await rvr.led_control.turn_leds_off()
-                    await asyncio.sleep(1.0)
+                    await asyncio.sleep(0.1)
                     print("green leds command done!")
 
                 # calculate the needed commands

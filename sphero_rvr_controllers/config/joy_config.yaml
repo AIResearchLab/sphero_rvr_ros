@@ -1,6 +1,6 @@
 axis_linear: 1 # LS vert
-scale_linear: 0.5
-scale_linear_turbo: 0.6
+scale_linear: 0.4
+scale_linear_turbo: 0.7
 axis_angular: 3 # RS hori
 scale_angular: 6.0
 scale_angular_turbo: 6.0

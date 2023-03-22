@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="world_name" default="worlds/empty.world"/>
+
+    <!-- robot -->
+    <include file="$(find sphero_rvr_description)launch/robot.launch"/>
+    <include file="$(find sphero_rvr_description)launch/state_publisher.launch"/>
+
+    <!-- controllers -->
+    <include file="$(find sphero_rvr_controllers)launch/sphero_rvr_controllers.launch"/>
+
+    <!--- move base -->
+    <!-- <include file="$(find sphero_rvr_navigation)/launch/move_base.launch" /> -->
+    <!-- gmapping -->
+    <!-- <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" /> -->
+
+    <!-- gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+    </include>
+
+    <!-- spawn robot -->
+    <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
+        args="-x 0 -y 0 -z 0.1 -Y 0 -unpause -urdf -param robot_description -model rvr" />
+</launch>

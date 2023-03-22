@@ -10,8 +10,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
   <depend>sphero_rvr_driver</depend>
   <depend>sphero_rvr_description</depend>
 

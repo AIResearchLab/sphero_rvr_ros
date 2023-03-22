@@ -1,0 +1,28 @@
+map_frame: "map"
+robot_frame: "base_link"
+
+planners:
+  - name: NavfnROS
+    type: navfn/NavfnROS
+
+controllers:
+  - name: DWAPlannerROS
+    type: dwa_local_planner/DWAPlannerROS
+
+recovery_behaviors:
+  - name: rotate_recovery
+    type: rotate_recovery/RotateRecovery
+  - name: clear_costmap_recovery
+    type: clear_costmap_recovery/ClearCostmapRecovery
+
+planner_frequency: 1.0
+planner_patience: 5.0
+
+controller_frequency: 5.0
+controller_patience: 3.0
+
+recovery_enabled: true
+recovery_patience: 15.0
+
+oscillation_timeout: 10.0
+oscillation_distance: 0.2

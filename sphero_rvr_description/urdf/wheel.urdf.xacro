@@ -27,6 +27,14 @@
                     <cylinder radius="${1.05*rvr_wheel_radius}" length="${1.05*rvr_wheel_width}" />
                 </geometry>
             </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.076" />
+                <inertia
+                    ixx="${0.001}" ixy="0.0" ixz="0.0"
+                    iyy="${0.001}" iyz="0.0"
+                    izz="${0.001}"/>
+            </inertial>
         </link>
 
         <gazebo reference="${name}">
@@ -40,7 +48,7 @@
         <transmission name="${name}_trans" type="SimpleTransmission">
             <type>transmission_interface/SimpleTransmission</type>
             <actuator name="${name}_motor">
-            <mechanicalReduction>1</mechanicalReduction>
+                <mechanicalReduction>1</mechanicalReduction>
             </actuator>
             <joint name="${name}_joint">
                 <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>

@@ -10,9 +10,9 @@
     <include file="$(find urg_node)/launch/urg_lidar.launch" />
 
     <!--- move base -->
-    <!-- <include file="$(find sphero_rvr_navigation)/launch/move_base.launch" /> -->
+    <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" />
 
     <!-- gmapping -->
-    <!-- <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" /> -->
+    <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" />
 
 </launch>

@@ -2,7 +2,7 @@
 <launch>
     <!-- python driver node -->
     <node pkg="sphero_rvr_driver" type="rvr_driver.py" name="rvr_driver" output="screen">
-        <remap from="~cmd_vel" to="/cmd_vel" />
+        <remap from="~cmd_vel" to="/controller/tracks/cmd_vel" />
     </node>
 
     <!-- mqtt fleet data logger -->

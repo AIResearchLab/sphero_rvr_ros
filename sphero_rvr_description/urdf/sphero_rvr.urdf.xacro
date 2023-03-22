@@ -45,6 +45,14 @@
                 <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
             </geometry>
         </collision>
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="1.00" />
+            <inertia
+                ixx="${0.001}" ixy="0.0" ixz="0.0"
+                iyy="${0.001}" iyz="0.0"
+                izz="${0.001}"/>
+        </inertial>
     </link>
 
     <!-- tracks -->
@@ -83,7 +91,6 @@
     <gazebo>
         <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
             <robotNamespace>/</robotNamespace>
-            <legacyModeNS>true</legacyModeNS>
         </plugin>
     </gazebo>
 

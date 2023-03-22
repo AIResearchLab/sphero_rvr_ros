@@ -17,4 +17,9 @@
   <depend>urg_node</depend>
   <depend>move_base</depend>
   <depend>slam_gmapping</depend>
+  <depend>dwa_local_planner</depend>
+  <depend>costmap_2d</depend>
+  <depend>slam_toolbox</depend>
+  <depend>mbf_costmap_nav</depend>
+  <depend>mbf_mesh_nav</depend>
 </package>

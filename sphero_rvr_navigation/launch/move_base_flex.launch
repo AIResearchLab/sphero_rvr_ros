@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+  <!--- Run Move Base (flex) -->
+  <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" name="move_base_flex" clear_params="true" output="screen">
+    <rosparam file="$(find sphero_rvr_navigation)/config/move_base_flex.yaml" command="load"/>
+    <!-- observation sources located in costmap_common.yaml -->
+    <rosparam file="$(find sphero_rvr_navigation)/config/costmap_common.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find sphero_rvr_navigation)/config/costmap_common.yaml" command="load" ns="local_costmap" />
+
+    <!-- local costmap, needs size -->
+    <rosparam file="$(find sphero_rvr_navigation)/config/costmap_local.yaml" command="load" ns="local_costmap" />
+    <param name="local_costmap/width" value="7.0"/>
+    <param name="local_costmap/height" value="7.0"/>
+
+    <!-- global costmap with laser -->
+    <rosparam file="$(find sphero_rvr_navigation)/config/costmap_global.yaml" command="load" ns="global_costmap"/>
+    <param name="global_costmap/width" value="100.0" />
+    <param name="global_costmap/height" value="100.0" />
+
+    <rosparam file="$(find sphero_rvr_navigation)/config/planners.yaml" command="load"/>
+
+    <!-- remaps -->
+    <remap from="cmd_vel" to="/nav/cmd_vel"/>
+    <!-- <remap from="odom" to="/odometry/filtered/local"/> -->
+  </node>
+
+  <!-- move base 'legacy' goal relay -->
+  <node pkg="mbf_costmap_nav" type="move_base_legacy_relay.py" name="move_base" clear_params="true" output="screen" respawn="true">
+    <param name="base_global_planner" value="NavfnROS"/>
+    <param name="base_local_planner" value="DWAPlannerROS"/>
+  </node>
+
+</launch>

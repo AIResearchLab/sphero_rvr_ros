@@ -6,29 +6,30 @@
     <include file="$(find sphero_rvr_description)launch/robot.launch"/>
 
     <!-- controller manager -->
-    <rosparam command="load" file="$(find sphero_rvr_control)/config/control.yaml" />
-    <node name="rvr_controller_spawner" pkg="controller_manager" type="spawner"
-            args="
-            joint_state
-            diff_drive_controller
-            "/>
+    <rosparam command="load" file="$(find sphero_rvr_controllers)/config/controllers.yaml" />
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+        args="
+        controller/state
+        controller/tracks
+    "/>
 
     <!-- controllers -->
     <include file="$(find sphero_rvr_controllers)launch/sphero_rvr_controllers.launch"/>
 
     <!--- move base -->
-    <!-- <include file="$(find sphero_rvr_navigation)/launch/move_base.launch" /> -->
+    <!-- <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" /> -->
     <!-- gmapping -->
-    <!-- <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" /> -->
+    <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" />
 
     <!-- gazebo -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>
         <arg name="use_sim_time" value="true"/>
+        <!-- <arg name="gui" value="false"/> -->
         <arg name="gui" value="true"/>
     </include>
 
     <!-- spawn robot -->
     <node name="spawn_model" pkg="gazebo_ros" type="spawn_model"
-        args="-x 0 -y 0 -z 0.1 -Y 0 -unpause -urdf -param robot_description -model rvr" />
+        args="-z 0.1 -unpause -urdf -param /robot_description -model rvr" />
 </launch>

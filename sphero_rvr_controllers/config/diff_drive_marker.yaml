@@ -1,0 +1,12 @@
+robot_name: "diff_control"
+link_name: "base_link"
+marker_size_scale: 1.0
+linear_scale:
+  x: 1
+  y: 1
+max_positive_linear_velocity:
+  x: 1
+  y: 1
+max_negative_linear_velocity:
+  x: -1
+  y: -1

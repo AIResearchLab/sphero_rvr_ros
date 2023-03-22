@@ -15,4 +15,5 @@
   <depend>joy</depend>
   <depend>teleop_twist_joy</depend>
   <depend>twist_mux</depend>
+  <depend>interactive_marker_twist_server</depend>
 </package>

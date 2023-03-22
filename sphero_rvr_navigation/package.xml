@@ -16,7 +16,7 @@
   <depend>sphero_rvr_controllers</depend>
   <depend>urg_node</depend>
   <depend>move_base</depend>
-  <depend>slam_gmapping</depend>
+  <depend>gmapping</depend>
   <depend>dwa_local_planner</depend>
   <depend>costmap_2d</depend>
   <depend>slam_toolbox</depend>

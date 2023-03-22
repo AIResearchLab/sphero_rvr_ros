@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="body" params="name">
+
+        <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
+
+        <link name="${name}" >
+            <!-- <origin xyz="0 0 ${rvr_body_height/2}" rpy="0 0 0" /> -->
+            <visual>
+                <geometry>
+                    <mesh filename="package://sphero_rvr_description/meshes/body.dae" />
+                </geometry>
+                <material name="White"/>
+            </visual>
+            <collision >
+                <geometry>
+                    <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
+                </geometry>
+            </collision>
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="1.00" />
+                <inertia
+                    ixx="${0.001}" ixy="0.0" ixz="0.0"
+                    iyy="${0.001}" iyz="0.0"
+                    izz="${0.001}"/>
+            </inertial>
+        </link>
+
+        <gazebo reference="${name}">
+			<mu1 value="1.0"/>
+			<mu2 value="1.0"/>
+			<kp value="10000000.0" />
+			<kd value="1.0" />
+			<fdir1 value="1 0 0"/>
+		</gazebo>
+
+    </xacro:macro>
+
+</robot>

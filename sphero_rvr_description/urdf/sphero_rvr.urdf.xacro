@@ -7,6 +7,7 @@
     <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
 
     <!-- parts -->
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/body.urdf.xacro" />
     <xacro:include filename="$(find sphero_rvr_description)/urdf/track.urdf.xacro" />
 
     <!-- urg laser -->
@@ -32,28 +33,7 @@
     </joint>
 
     <!-- body acting as base link inertia -->
-    <link name="body" >
-        <origin xyz="0 0 ${rvr_body_height/2}" rpy="0 0 0" />
-        <visual>
-            <geometry>
-                <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
-            </geometry>
-            <material name="White"/>
-        </visual>
-        <collision >
-            <geometry>
-                <box size="${rvr_body_length} ${rvr_body_width} ${rvr_body_height}" />
-            </geometry>
-        </collision>
-        <inertial>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="1.00" />
-            <inertia
-                ixx="${0.001}" ixy="0.0" ixz="0.0"
-                iyy="${0.001}" iyz="0.0"
-                izz="${0.001}"/>
-        </inertial>
-    </link>
+    <xacro:body name="body" />
 
     <!-- tracks -->
     <xacro:track name="left_track" parent="base_link" length="${rvr_track_length}" spin="1" >

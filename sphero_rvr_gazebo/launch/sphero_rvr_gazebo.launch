@@ -4,7 +4,14 @@
 
     <!-- robot -->
     <include file="$(find sphero_rvr_description)launch/robot.launch"/>
-    <include file="$(find sphero_rvr_description)launch/state_publisher.launch"/>
+
+    <!-- controller manager -->
+    <rosparam command="load" file="$(find sphero_rvr_control)/config/control.yaml" />
+    <node name="rvr_controller_spawner" pkg="controller_manager" type="spawner"
+            args="
+            joint_state
+            diff_drive_controller
+            "/>
 
     <!-- controllers -->
     <include file="$(find sphero_rvr_controllers)launch/sphero_rvr_controllers.launch"/>

@@ -2,16 +2,15 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 	<!-- robot geometric characteristics -->
-    <xacro:property name="rvr_body_length" value="0.165"/>
-    <xacro:property name="rvr_body_width" value="0.13"/>
-    <xacro:property name="rvr_body_height" value="0.048"/>
+    <xacro:property name="rvr_body_length" value="0.182"/>
+    <xacro:property name="rvr_body_width" value="0.138"/>
+    <xacro:property name="rvr_body_height" value="0.043"/>
 
-    <xacro:property name="rvr_wheel_width" value="0.03"/>
+    <xacro:property name="rvr_wheel_width" value="0.035"/>
     <xacro:property name="rvr_wheel_diameter" value="0.065"/>
     <xacro:property name="rvr_wheel_radius" value="${rvr_wheel_diameter/2}"/>
 
-    <xacro:property name="rvr_track_dz" value="-0.008"/>
-    <xacro:property name="rvr_track_length" value="0.115"/>
-    <xacro:property name="rvr_track_link_size" value="0.002"/>
+    <xacro:property name="rvr_track_dz" value="0.0075"/>
+    <xacro:property name="rvr_track_length" value="${0.062*2}"/>
 
 </robot>

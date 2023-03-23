@@ -8,7 +8,7 @@
 
     <!-- parts -->
     <xacro:include filename="$(find sphero_rvr_description)/urdf/body.urdf.xacro" />
-    <xacro:include filename="$(find sphero_rvr_description)/urdf/track.urdf.xacro" />
+    <xacro:include filename="$(find sphero_rvr_description)/urdf/wheel.urdf.xacro" />
 
     <!-- urg laser -->
     <xacro:include filename="$(find urg_node)/urdf/hokuyo_ust10.urdf.xacro" />
@@ -21,7 +21,7 @@
     <link name="base_footprint"/>
 
     <joint name="base_footprint_joint" type="fixed">
-        <origin xyz="0 0 ${-rvr_body_height/2 - 0.01}" rpy="0 0 0" />
+        <origin xyz="0 0 ${rvr_track_dz - rvr_wheel_radius}" rpy="0 0 0" />
         <parent link="base_link" />
         <child link="base_footprint" />
     </joint>
@@ -36,34 +36,23 @@
     <xacro:body name="body" />
 
     <!-- tracks -->
-    <xacro:track name="left_track" parent="base_link" length="${rvr_track_length}" spin="1" >
-        <origin xyz="0 ${rvr_body_width/2} ${rvr_track_dz}" rpy="0 0 0" />
-    </xacro:track>
+    <xacro:wheel name="left_track_back_wheel" parent="base_link" direction="1" >
+        <origin xyz="-${rvr_track_length/2} ${rvr_body_width/2} ${rvr_track_dz}" rpy="0 0 0" />
+    </xacro:wheel>
+    <xacro:wheel name="left_track_front_wheel" parent="base_link" direction="1">
+        <origin xyz="${rvr_track_length/2} ${rvr_body_width/2} ${rvr_track_dz}" rpy="0 0 0" />
+    </xacro:wheel>
 
-    <xacro:track name="right_track" parent="base_link" length="${rvr_track_length}" spin="-1" >
-        <origin xyz="0 -${rvr_body_width/2} ${rvr_track_dz}" rpy="${M_PI} 0 0" />
-    </xacro:track>
-
-    <!-- brain -->
-    <link name="pi_sbc" >
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <visual>
-            <geometry>
-                <box size="0.075 0.055 0.01" />
-            </geometry>
-            <material name="Green"/>
-        </visual>
-    </link>
-
-    <joint name="pi_sbc_joint" type="fixed" >
-        <parent link="base_link" />
-        <child link="pi_sbc" />
-        <origin xyz="-0.04 0 ${rvr_body_height/2 + 0.012}" rpy="0 0 0" />
-    </joint>
+    <xacro:wheel name="right_track_back_wheel" parent="base_link" direction="-1" >
+        <origin xyz="-${rvr_track_length/2} -${rvr_body_width/2} ${rvr_track_dz}" rpy="${M_PI} 0 0" />
+    </xacro:wheel>
+    <xacro:wheel name="right_track_front_wheel" parent="base_link" direction="-1">
+        <origin xyz="${rvr_track_length/2} -${rvr_body_width/2} ${rvr_track_dz}" rpy="${M_PI} 0 0" />
+    </xacro:wheel>
 
     <!-- laser -->
     <xacro:hokuyo_ust10_mount parent_link="base_link" prefix="urg" topic="scan" >
-        <origin xyz="${0.04} 0 ${rvr_body_height/2 + 0.002}" rpy="0 0 0" />
+        <origin xyz="${-0.03} 0 ${rvr_body_height + 0.005}" rpy="0 0 0" />
     </xacro:hokuyo_ust10_mount>
 
     <!-- gazebo extras -->

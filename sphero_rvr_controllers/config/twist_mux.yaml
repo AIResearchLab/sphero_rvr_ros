@@ -15,6 +15,10 @@ topics:
     topic: nav/cmd_vel
     timeout: 0.5
     priority: 10
+  - name: external
+    topic: cmd_vel
+    timeout: 0.5
+    priority: 5
 locks:
   - name: e_stop
     topic: e_stop

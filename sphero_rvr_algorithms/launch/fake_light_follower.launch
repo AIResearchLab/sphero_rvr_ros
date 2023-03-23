@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- fake light publisher -->
+    <node pkg="sphero_rvr_algorithms" type="fake_publish_illuminance.py" name="fake_light_publisher" />
+
+    <!-- light follower -->
+    <node pkg="sphero_rvr_algorithms" type="follow_light.py" name="light_follower" output="screen" />
+
+    <!-- illuminance source static transform -->
+    <node pkg="tf" type="static_transform_publisher" name="illuminance_source_static_transform" args="4 3 0 0 0 0 illuminance_source map 100" />
+</launch>

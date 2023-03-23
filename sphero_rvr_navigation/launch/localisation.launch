@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- filter parameters -->
+  <arg name="ekf_local_config" default="$(find sphero_rvr_navigation)/config/localisation.yaml" />
+
+  <!-- filters -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_local" clear_params="true" >
+    <rosparam command="load" file="$(arg ekf_local_config)" />
+    <param name="imu0" value="/rvr_driver/imu/data" />
+    <remap from="odometry/filtered" to="odometry/filtered/local" />
+  </node>
+
+</launch>

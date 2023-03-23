@@ -21,7 +21,7 @@
 
     <!-- remaps -->
     <remap from="cmd_vel" to="/nav/cmd_vel"/>
-    <!-- <remap from="odom" to="/odometry/filtered/local"/> -->
+    <remap from="odom" to="/odometry/filtered/local"/>
   </node>
 
   <!-- move base 'legacy' goal relay -->

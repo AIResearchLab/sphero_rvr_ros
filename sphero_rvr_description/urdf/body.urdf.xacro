@@ -6,7 +6,6 @@
         <xacro:include filename="$(find sphero_rvr_description)/urdf/geometry.urdf.xacro" />
 
         <link name="${name}" >
-            <!-- <origin xyz="0 0 ${rvr_body_height/2}" rpy="0 0 0" /> -->
             <visual>
                 <geometry>
                     <mesh filename="package://sphero_rvr_description/meshes/body.dae" />
@@ -20,11 +19,11 @@
             </collision>
             <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
-                <mass value="1.00" />
+                <mass value="2.00" />
                 <inertia
-                    ixx="${0.001}" ixy="0.0" ixz="0.0"
-                    iyy="${0.001}" iyz="0.0"
-                    izz="${0.001}"/>
+                    ixx="${0.005}" ixy="0.0" ixz="0.0"
+                    iyy="${0.005}" iyz="0.0"
+                    izz="${0.005}"/>
             </inertial>
         </link>
 

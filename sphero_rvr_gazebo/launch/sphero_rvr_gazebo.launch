@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="world_name" default="worlds/empty.world"/>
+    <!-- <arg name="world_name" default="worlds/empty.world"/> -->
+    <!-- <arg name="world_name" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_autorace.world"/> -->
+    <arg name="world_name" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="$(find turtlebot3_gazebo)/models/turtlebot3_autorace/ground_picture" />
 
     <!-- robot -->
     <include file="$(find sphero_rvr_description)launch/robot.launch"/>
@@ -25,6 +28,8 @@
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(arg world_name)"/>
         <arg name="use_sim_time" value="true"/>
+        <arg name="paused" value="false"/>
+        <arg name="headless" value="false"/>
         <!-- <arg name="gui" value="false"/> -->
         <arg name="gui" value="true"/>
     </include>

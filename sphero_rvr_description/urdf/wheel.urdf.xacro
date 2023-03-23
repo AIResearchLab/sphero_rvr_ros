@@ -10,7 +10,7 @@
             <child link="${name}" />
             <xacro:insert_block name="origin" />
             <axis xyz="0 ${direction} 0" rpy="0 0 0" />
-            <limit effort="30" velocity="0.2" />
+            <limit effort="10.0" velocity="50.0" />
         </joint>
 
         <link name="${name}">
@@ -35,6 +35,21 @@
                     iyy="${0.001}" iyz="0.0"
                     izz="${0.001}"/>
             </inertial>
+        </link>
+
+        <joint name="${name}_taco_joint" type="fixed">
+            <parent link="${name}" />
+            <child link="${name}_taco" />
+            <origin xyz="0 ${rvr_wheel_width / 2} ${1.05*rvr_wheel_radius}" rpy="0 0 0" />
+        </joint>
+
+        <link name="${name}_taco">
+            <visual>
+                <geometry>
+                    <cylinder radius="0.005" length="0.004" />
+                </geometry>
+                <material name="Red"/>
+            </visual>
         </link>
 
         <gazebo reference="${name}">

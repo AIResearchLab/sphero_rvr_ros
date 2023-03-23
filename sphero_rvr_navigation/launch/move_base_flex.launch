@@ -9,13 +9,13 @@
 
     <!-- local costmap, needs size -->
     <rosparam file="$(find sphero_rvr_navigation)/config/costmap_local.yaml" command="load" ns="local_costmap" />
-    <param name="local_costmap/width" value="7.0"/>
-    <param name="local_costmap/height" value="7.0"/>
+    <param name="local_costmap/width" value="4.0"/>
+    <param name="local_costmap/height" value="4.0"/>
 
     <!-- global costmap with laser -->
     <rosparam file="$(find sphero_rvr_navigation)/config/costmap_global.yaml" command="load" ns="global_costmap"/>
-    <param name="global_costmap/width" value="100.0" />
-    <param name="global_costmap/height" value="100.0" />
+    <param name="global_costmap/width" value="50.0" />
+    <param name="global_costmap/height" value="50.0" />
 
     <rosparam file="$(find sphero_rvr_navigation)/config/planners.yaml" command="load"/>
 

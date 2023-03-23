@@ -13,10 +13,10 @@ DWAPlannerROS:
 
 # The velocity when robot is moving in a straight line
   max_vel_trans:  0.7
-  min_vel_trans:  0.01
+  min_vel_trans:  0.2
 
-  max_vel_theta: 1.8
-  min_vel_theta: 1.2
+  max_vel_theta: 3.8
+  min_vel_theta: 2.2
 
   acc_lim_x: 2.0
   acc_lim_y: 0.0

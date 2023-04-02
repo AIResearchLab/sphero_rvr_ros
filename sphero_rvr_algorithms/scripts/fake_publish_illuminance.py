@@ -29,6 +29,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         # create illuminance message
         illuminance_msg = Illuminance()
+        illuminance_msg.header.frame_id = 'illuminance_source'
         illuminance_msg.header.stamp = rospy.Time.now()
 
         # get the map position of the illuminance sensor

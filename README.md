@@ -2,6 +2,7 @@
 
 [![ROS1 Noetic](https://img.shields.io/badge/ROS1-Noetic-blue)](http://wiki.ros.org/noetic/Installation/Ubuntu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open in Visual Studio Code](https://img.shields.io/badge/vscode-dev-blue)](https://open.vscode.dev/AIResearchLab/sphero_rvr_ros)
 
 ROS1 meta package containing an implementation of a Sphero RVR robot using ROS1 and the sphero-rvr-sdk in Python.
 

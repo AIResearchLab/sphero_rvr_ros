@@ -5,6 +5,7 @@
     <!-- <arg name="world_name" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/> -->
     <!-- <env name="GAZEBO_RESOURCE_PATH" value="$(find turtlebot3_gazebo)/models/turtlebot3_autorace/ground_picture" /> -->
     <arg name="world_name" default="$(find sphero_rvr_algorithms)/worlds/obstacles.world"/>
+    <!-- <arg name="world_name" default="$(find sphero_rvr_algorithms)/worlds/ball_maze.world"/> -->
 
     <!-- robot -->
     <include file="$(find sphero_rvr_description)launch/robot.launch"/>
@@ -24,10 +25,10 @@
     <include file="$(find sphero_rvr_navigation)/launch/localisation.launch" />
 
     <!-- gmapping -->
-    <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" />
+    <!-- <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" /> -->
 
     <!--- move base -->
-    <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" />
+    <!-- <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" /> -->
 
     <!-- gazebo -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">

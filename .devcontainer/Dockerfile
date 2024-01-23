@@ -16,11 +16,9 @@ RUN apt-get install -y \
     python3-wstool \
     build-essential \
     wget \
-    git
-
-# install tigervncserver
-RUN wget https: //sourceforge.net/projects/tigervnc/files/stable/1.12.0/ubuntu-20.04LTS/$(dpkg --print-architecture)/tigervncserver_1.12.0-1ubuntu1_$(dpkg --print-architecture).deb && \
-    apt-get install -y ./tigervncserver_*.deb
+    git \
+    python3-pip \
+    python3-venv
 
 # Add vscode user with same UID and GID as your host system
 # (copied from https: //code.visualstudio.com/remote/advancedcontainers/add-nonroot-user#_creating-a-nonroot-user)
@@ -47,9 +45,6 @@ RUN rosdep update
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 
 RUN mkdir -p /home/$USERNAME/catkin_ws/src
-
-RUN export DISPLAY=: 0
-
 
 # default workspace
 WORKDIR /home/$USERNAME/catkin_ws

@@ -12,5 +12,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rviz</depend>
+  <exec_depend>rviz</exec_depend>
 </package>

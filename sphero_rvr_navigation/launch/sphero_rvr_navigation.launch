@@ -9,6 +9,9 @@
     <!-- laser driver -->
     <include file="$(find urg_node)/launch/urg_lidar.launch" />
 
+    <!-- localisation -->
+    <include file="$(find sphero_rvr_navigation)/launch/localisation.launch" />
+
     <!--- move base -->
     <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" />
 

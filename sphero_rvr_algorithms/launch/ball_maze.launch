@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- include sphero gazebo launch -->
+    <include file="$(find sphero_rvr_gazebo)/launch/sphero_rvr_gazebo.launch">
+        <arg name="world_name" value="$(find sphero_rvr_algorithms)/worlds/ball_maze.world"/>
+    </include>
+
+    <!-- gmapping -->
+    <include file="$(find sphero_rvr_navigation)/launch/gmapping.launch" />
+
+    <!--- move base -->
+    <include file="$(find sphero_rvr_navigation)/launch/move_base_flex.launch" />
+
+</launch>

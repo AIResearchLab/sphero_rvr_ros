@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- include navigation -->
+    <include file="$(find sphero_rvr_navigation)/launch/sphero_rvr_navigation.launch" />
+
+</launch>

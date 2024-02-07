@@ -7,6 +7,6 @@
     </node>
 
     <!-- mqtt fleet data logger -->
-    <node pkg="sphero_rvr_driver" type="mqtt_fleet_logger.py" name="rvr_fleet_logger" output="screen">
-    </node>
+    <!-- <node pkg="sphero_rvr_driver" type="mqtt_fleet_logger.py" name="rvr_fleet_logger" output="screen">
+    </node> -->
 </launch>

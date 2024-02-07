@@ -434,6 +434,9 @@ class RVRDriver():
     ''' ros timers '''
 
     def publish_timer_cb(self, event):
+        """
+        ros publish timer callback
+        """
         # publish data
         self.publish_color()
         self.publish_imu()

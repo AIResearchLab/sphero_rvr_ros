@@ -167,7 +167,7 @@ class RVRDriver():
         # - imu orientation
         # - gyroscope velocities
         # - linear acceleration
-        self.imu_pub = rospy.Publisher("~imu", Imu, queue_size=2)
+        self.imu_pub = rospy.Publisher("~imu/data", Imu, queue_size=2)
         # Ambient light
         self.light_pub = rospy.Publisher(
             "~ambient_light", Illuminance, queue_size=2
@@ -178,6 +178,8 @@ class RVRDriver():
         self.odom_pub = rospy.Publisher("~odom", Odometry, queue_size=2)
         # speed
         self.speed_pub = rospy.Publisher("~speed", Float32, queue_size=2)
+        # battery
+        self.battery_pub = rospy.Publisher("~battery", Float32, queue_size=2)
 
         rospy.loginfo("subscribers")
         # cmd vel subscriber
@@ -351,7 +353,7 @@ class RVRDriver():
                 # [dl, l, dr, r] = self.calculate_wheel_commands()
                 # print([dl, l, dr, r])
                 [d, s, h] = self.calculate_speed_and_heading()
-                print([d, s, h])
+                # print([d, s, h])
 
                 # new heading
                 self.heading += h
@@ -443,6 +445,7 @@ class RVRDriver():
         self.publish_light()
         self.publish_odom()
         self.speed_pub.publish(self.speed)
+        self.battery_pub.publish(self.battery_percentage)
 
     ''' ros publishers '''
 

@@ -375,6 +375,14 @@ class RVRDriver():
             print(e)
 
         finally:
+            await rvr.set_all_leds(
+                led_group=RvrLedGroups.headlight_left.value,
+                led_brightness_values=[100, 0, 0]
+            )
+            await rvr.set_all_leds(
+                led_group=RvrLedGroups.headlight_right.value,
+                led_brightness_values=[100, 0, 0]
+            )
             await rvr.sensor_control.clear()
             await rvr.close()
             # Delay to allow RVR issue command before closing

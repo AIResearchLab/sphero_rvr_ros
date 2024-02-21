@@ -375,9 +375,10 @@ class RVRDriver():
                 if self.heading < 0:
                     self.heading = 360 - self.heading
 
+                # XXX FIXME
                 # if the command is outside the command window, stop the robot
-                if (rospy.Time.now() - self.last_cmd_vel_time) > self.cmd_window:
-                    s = 0.0
+                # if (rospy.Time.now() - self.last_cmd_vel_time) > self.cmd_window:
+                #     s = 0.0
 
                 # apply motor command values
                 await rvr.drive_with_heading(s, self.heading, d)

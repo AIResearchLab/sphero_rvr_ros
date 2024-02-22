@@ -121,9 +121,9 @@ class RVRDriver():
         # initial LED settings
         self.led_settings: Dict[int, List[int]] = {
             # left headlight
-            RvrLedGroups.headlight_left: self.ACTIVE_COLOR.value,
+            RvrLedGroups.headlight_left: [0, 255, 0],
             # right headlight
-            RvrLedGroups.headlight_right: self.ACTIVE_COLOR.value,
+            RvrLedGroups.headlight_right: [0, 255, 0],
             # left side LED, left half
             RvrLedGroups.battery_door_front: self.INACTIVE_COLOR.value,
             # left side LED, right half
@@ -133,8 +133,8 @@ class RVRDriver():
             # right side LED, right half
             RvrLedGroups.power_button_rear: self.INACTIVE_COLOR.value,
             # back LED
-            RvrLedGroups.brakelight_left: self.BACK_COLOR.value,
-            RvrLedGroups.brakelight_right: self.BACK_COLOR.value,
+            RvrLedGroups.brakelight_left: [255, 0, 0],
+            RvrLedGroups.brakelight_right: [255, 0, 0],
         }
         # sensor values
         # battery
@@ -239,8 +239,6 @@ class RVRDriver():
             led_brightness_values=self.led_settings[RvrLedGroups.brakelight_right]
         )
 
-        await asyncio.sleep(0.1)
-
         # apply led values to sides
         # await rvr.set_all_leds(
         #     led_group=RvrLedGroups.battery_door_front.value,
@@ -323,17 +321,19 @@ class RVRDriver():
                 led_brightness_values=self.led_settings[RvrLedGroups.headlight_right]
             )
 
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
             while not rospy.is_shutdown():
 
                 # apply all led values
                 if self.led_set_time:
                     self.calculate_side_panel_brightness()
-                    self.battery_percentage = await rvr.get_battery_percentage()
+                    batt = await rvr.get_battery_percentage()
+                    self.battery_percentage = float(batt['percentage'])
                     await self.apply_leds()
                     self.led_set_time = False
                     await asyncio.sleep(0.1)
+                    # print("led update")
 
                 if self.blink_enabled:
                     # turn off speed
@@ -367,6 +367,12 @@ class RVRDriver():
                 [d, s, h] = self.calculate_speed_and_heading()
                 # print([d, s, h])
 
+                # XXX FIXME
+                # if the command is outside the command window, stop the robot
+                if (rospy.Time.now() - self.last_cmd_vel_time) > self.cmd_window:
+                    s = 0
+                    h = 0
+
                 # new heading
                 self.heading += h
                 # handle roll over
@@ -374,11 +380,6 @@ class RVRDriver():
                 # handle negative heading
                 if self.heading < 0:
                     self.heading = 360 - self.heading
-
-                # XXX FIXME
-                # if the command is outside the command window, stop the robot
-                # if (rospy.Time.now() - self.last_cmd_vel_time) > self.cmd_window:
-                #     s = 0.0
 
                 # apply motor command values
                 await rvr.drive_with_heading(s, self.heading, d)

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- illuminance source tf publisher -->
+    <node pkg="sphero_rvr_algorithms" type="static_light_source_tf.py" name="illuminance_source_tf_publisher" />
+
+    <!-- fake light publisher -->
+    <node pkg="sphero_rvr_algorithms" type="fake_publish_illuminance.py" name="fake_light_publisher" />
+</launch>

@@ -7,7 +7,17 @@
     <include file="$(find sphero_rvr_controllers)launch/sphero_rvr_controllers.launch"/>
 
     <!-- laser driver -->
-    <include file="$(find urg_node)/launch/urg_lidar.launch" />
+    <node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+        <param name="ip_address" value=""/>
+        <param name="serial_port" value="/dev/ttyACM0"/>
+        <param name="serial_baud" value="115200"/>
+        <param name="frame_id" value="urg_laser"/>
+        <param name="calibrate_time" value="true"/>
+        <param name="publish_intensity" value="true"/>
+        <param name="publish_multiecho" value="false"/>
+        <param name="angle_min" value="-1.5707963"/>
+        <param name="angle_max" value="1.5707963"/>
+    </node>
 
     <!-- localisation -->
     <include file="$(find sphero_rvr_navigation)/launch/localisation.launch" />

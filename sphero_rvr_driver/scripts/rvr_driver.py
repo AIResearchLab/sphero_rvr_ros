@@ -4,7 +4,7 @@
 copyright rafftod
 sourced from rafftod/rvr_ros on Github
 
-modified to work ith navigation stack as a temperary python controller which will be replaced by a ros_control implementation
+modified to work with navigation stack as a temperary python controller which will be replaced by a ros_control implementation
 
 The purpose of this script is to make the robot
 turn around, to test that UART can work properly for a longer
@@ -86,7 +86,7 @@ async def set_headlights_green():
 
 class RVRDriver():
     # robot API sensor streaming interval (ms)
-    SENSOR_STREAMING_INTERVAL: int = 2 * int(0.200 * 1000)
+    SENSOR_STREAMING_INTERVAL: int = int(0.200 * 1000.0)
 
     # LEDs settings
     ACTIVE_COLOR: Colors = Colors.green
@@ -105,6 +105,14 @@ class RVRDriver():
         # main loop callback interval (seconds)
         self.loop_hz = rospy.get_param("~loop_hz", 5.0)
         self.loop_rate = rospy.Rate(self.loop_hz)
+        self.pub_rate = rospy.get_param("~pub_rate", 1.0)
+
+        # frames
+        self.base_frame = rospy.get_param("~base_frame", "base_link")
+        self.odom_frame = rospy.get_param("~odom_frame", "odom")
+        self.imu_frame = rospy.get_param("~imu_frame", "base_link")
+        self.ambient_light_frame = rospy.get_param(
+            "~ambient_light_frame", "base_link")
 
         # speed in m/s
         self.speed: float = 0
@@ -138,30 +146,34 @@ class RVRDriver():
         }
         # sensor values
         # battery
-        self.battery_percentage: float = 0
+        self.battery_percentage: float = 0.0
         self.latest_instruction: int = 0
         # accelerometer
-        self.accelerometer_reading: Dict[str, float] = {"X": 0, "Y": 0, "Z": 0}
+        self.accelerometer_reading: Dict[str, float] = {
+            "X": 0.0, "Y": 0.0, "Z": 0.0}
         # ground color sensor
         self.ground_color: Dict[str, int] = {"R": 0, "G": 0, "B": 0}
         # gyroscope
-        self.angular_velocity: Dict[str, float] = {"X": 0, "Y": 0, "Z": 0}
+        self.angular_velocity: Dict[str, float] = {
+            "X": 0.0, "Y": 0.0, "Z": 0.0}
         # IMU angles in degrees
-        self.imu_reading: Dict[str, float] = {"Pitch": 0, "Roll": 0, "Yaw": 0}
+        self.imu_reading: Dict[str, float] = {
+            "Pitch": 0.0, "Roll": 0.0, "Yaw": 0.0}
         # light sensor
-        self.ambient_light: float = 0
+        self.ambient_light: float = 0.0
         # locator
-        self.location: Dict[str, float] = {"X": 0, "Y": 0}
+        self.location: Dict[str, float] = {"X": 0.0, "Y": 0.0}
         # quaternion
-        self.quat_reading: Dict[str, float] = {"W": 0, "X": 0, "Y": 0, "Z": 0}
+        self.quat_reading: Dict[str, float] = {
+            "W": 0.0, "X": 0.0, "Y": 0.0, "Z": 0.0}
         # velocity
-        self.velocity_reading: Dict[str, float] = {"X": 0, "Y": 0}
+        self.velocity_reading: Dict[str, float] = {"X": 0.0, "Y": 0.0}
 
         self.last_cmd_vel_time = rospy.Time.now()
-        self.cmd_window = rospy.Duration(1.0)
+        self.cmd_window = rospy.Duration(0.5)
 
-        rospy.loginfo("setting things up...")
-        rospy.loginfo("publishers")
+        rospy.loginfo("rvr setting things up...")
+        rospy.loginfo("rvr publishers")
         # Ground color as RGB
         self.ground_color_pub = rospy.Publisher(
             "~ground_color", ColorRGBA, queue_size=2
@@ -184,7 +196,7 @@ class RVRDriver():
         # battery
         self.battery_pub = rospy.Publisher("~battery", Float32, queue_size=2)
 
-        rospy.loginfo("subscribers")
+        rospy.loginfo("rvr subscribers")
         # cmd vel subscriber
         self.vel_sub = rospy.Subscriber(
             "~cmd_vel", Twist, self.cmd_vel_cb, queue_size=1)
@@ -198,7 +210,7 @@ class RVRDriver():
 
         # ros timers
         self.pub_timer = rospy.Timer(
-            rospy.Duration(0.5), self.publish_timer_cb)
+            rospy.Duration(1.0 / self.pub_rate), self.publish_timer_cb)
 
         # lambda set the led_set_time to True
         self.apply_leds_timer = rospy.Timer(
@@ -259,21 +271,21 @@ class RVRDriver():
 
     async def rvr_loop(self):
         try:
-            print("waking rvr")
+            rospy.loginfo("waking rvr..")
             await rvr.wake()
 
             # Give RVR time to wake up
             await asyncio.sleep(2)
-            print("rvr connected")
+            rospy.loginfo("rvr connected")
 
             # lights off
             await rvr.led_control.turn_leds_off()
 
             # lights blinking
-            print("blink LEDS")
+            rospy.loginfo("rvr blink LEDS")
             await blink_leds()
 
-            print("Enabling sensors...")
+            rospy.loginfo("rvr set enabling sensors...")
             await rvr.enable_color_detection(is_enabled=True)
             await rvr.sensor_control.add_sensor_data_handler(
                 service=RvrStreamingServices.accelerometer,
@@ -288,27 +300,34 @@ class RVRDriver():
                 handler=self.ground_sensor_handler,
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.gyroscope, handler=self.gyroscope_handler
+                service=RvrStreamingServices.gyroscope,
+                handler=self.gyroscope_handler
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.imu, handler=self.imu_handler
+                service=RvrStreamingServices.imu,
+                handler=self.imu_handler
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.ambient_light, handler=self.light_handler
+                service=RvrStreamingServices.ambient_light,
+                handler=self.light_handler
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.locator, handler=self.locator_handler
+                service=RvrStreamingServices.locator,
+                handler=self.locator_handler
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.quaternion, handler=self.quaternion_handler
+                service=RvrStreamingServices.quaternion,
+                handler=self.quaternion_handler
             )
             await rvr.sensor_control.add_sensor_data_handler(
-                service=RvrStreamingServices.velocity, handler=self.velocity_handler
+                service=RvrStreamingServices.velocity,
+                handler=self.velocity_handler
             )
 
-            print("sensor streaming on")
-            await rvr.sensor_control.start(interval=250)
+            rospy.loginfo("rvr set sensor streaming on")
+            await rvr.sensor_control.start(interval=self.SENSOR_STREAMING_INTERVAL)
 
+            # reset yaw
             await rvr.reset_yaw()
 
             # front lights green
@@ -393,6 +412,7 @@ class RVRDriver():
             print(e)
 
         finally:
+            # set leds red to indicate driver shutdown
             await rvr.set_all_leds(
                 led_group=RvrLedGroups.headlight_left.value,
                 led_brightness_values=[180, 0, 0]
@@ -473,7 +493,9 @@ class RVRDriver():
     ''' ros publishers '''
 
     def publish_color(self) -> None:
-        """Sends the stored ground color as an RGBA ROS message."""
+        """
+        Sends the stored ground color as an RGBA ROS message.
+        """
         color_msg = ColorRGBA()
         color_msg.r = self.ground_color["R"]
         color_msg.g = self.ground_color["G"]
@@ -482,12 +504,15 @@ class RVRDriver():
         self.ground_color_pub.publish(color_msg)
 
     def publish_imu(self):
-        """Sends the stored IMU data as an Imu ROS message.
+        """
+        Sends the stored IMU data as an Imu ROS message.
         This message includes :
         - orientation (pitch, roll, yaw) from the IMU sensor
         - angular velocities (x, y, z) from the gyroscope
-        - linear acceleration (x, y, z) from the accelerometer"""
+        - linear acceleration (x, y, z) from the accelerometer
+        """
         imu_msg = Imu()
+        imu_msg.header.frame_id = self.imu_frame
         imu_msg.header.stamp = rospy.Time.now()
         # build quaterion by converting degrees to radians
         imu_msg.orientation = Quaternion(
@@ -508,20 +533,26 @@ class RVRDriver():
         self.imu_pub.publish(imu_msg)
 
     def publish_light(self):
-        """Publishes the light illuminance in Lux."""
+        """
+        Publishes the light illuminance in Lux.
+        """
         light_msg = Illuminance()
+        light_msg.header.frame_id = self.ambient_light_frame
         light_msg.header.stamp = rospy.Time.now()
         light_msg.illuminance = self.ambient_light
         self.light_pub.publish(light_msg)
 
     def publish_odom(self):
-        """Publishes the odometry data as a ROS message.
+        """
+        Publishes the odometry data as a ROS message.
         This message includes :
         - the current location of the robot in the map frame from the locator
         - the current orientation of the robot in the map frame from the quaternion
         - the current velocity of the robot in the map frame from the velocity sensor
-        - the current angular velocity of the robot in the map frame from the gyroscope"""
+        - the current angular velocity of the robot in the map frame from the gyroscope
+        """
         odom_msg = Odometry()
+        odom_msg.header.frame_id = self.odom_frame
         odom_msg.header.stamp = rospy.Time.now()
         odom_msg.pose.pose.position.x = self.location.get("X")
         odom_msg.pose.pose.position.y = self.location.get("Y")
@@ -562,7 +593,7 @@ class RVRDriver():
         self.speed_params["right_velocity"] = x + \
             (yaw * self.separation / 2.0) / self.radius
 
-    # leds
+    ''' leds '''
 
     def headlight_led_cb(self, msg: ColorRGBA) -> None:
         # left headlight

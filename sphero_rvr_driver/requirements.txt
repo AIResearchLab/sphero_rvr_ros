@@ -1,2 +1,6 @@
 sphero-sdk==0.3.4.post2
 paho-mqtt
+# sparkfun-piservohat
+sparkfun-qwiic-vl53l1x
+sparkfun-qwiic-titan-gps
+pynmea2

@@ -10,8 +10,8 @@ controllers:
     type: dwa_local_planner/DWAPlannerROS
 
 recovery_behaviors:
-  # - name: rotate_recovery
-  #   type: rotate_recovery/RotateRecovery
+  - name: rotate_recovery
+    type: rotate_recovery/RotateRecovery
   - name: clear_costmap_recovery
     type: clear_costmap_recovery/ClearCostmapRecovery
 

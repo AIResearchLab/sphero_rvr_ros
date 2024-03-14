@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <sdf version='1.7'>
   <world name='default'>
     <light name='sun' type='directional'>
@@ -680,40 +681,6 @@
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='rvr'>
-        <pose>2.78861 1.80268 0.026625 0 -0 0.933431</pose>
-        <scale>1 1 1</scale>
-        <link name='base_link'>
-          <pose>2.78861 1.80268 0.026625 0 -0 0.933431</pose>
-          <velocity>-0 -0 0 2e-06 3e-06 0</velocity>
-          <acceleration>-0 0 -1e-06 -3e-06 -4e-06 2.1e-05</acceleration>
-          <wrench>-1e-06 0 -3e-06 0 -0 0</wrench>
-        </link>
-        <link name='left_track_back_wheel'>
-          <pose>2.69626 1.79391 0.034125 1e-06 -0.466856 0.933431</pose>
-          <velocity>-0 -0 1e-06 -1e-06 4e-06 0</velocity>
-          <acceleration>-1e-06 -1e-06 -0 2.8e-05 -2.1e-05 2.1e-05</acceleration>
-          <wrench>-0 -0 -0 0 -0 0</wrench>
-        </link>
-        <link name='left_track_front_wheel'>
-          <pose>2.77005 1.89357 0.034125 -0 -0.429904 0.933431</pose>
-          <velocity>-0 -0 1e-06 -1e-06 4e-06 0</velocity>
-          <acceleration>-1e-06 -1e-06 -0 2.4e-05 -2.8e-05 2.2e-05</acceleration>
-          <wrench>-0 -0 -0 0 -0 0</wrench>
-        </link>
-        <link name='right_track_back_wheel'>
-          <pose>2.80716 1.71179 0.034125 3.14159 1.23645 0.933426</pose>
-          <velocity>0 -0 0 7e-06 -2e-06 -0</velocity>
-          <acceleration>1e-06 1e-06 0 -1.3e-05 9e-06 2.4e-05</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-        <link name='right_track_front_wheel'>
-          <pose>2.88095 1.81145 0.034125 3.14159 1.28522 0.933425</pose>
-          <velocity>-0 -0 0 1.1e-05 -5e-06 0</velocity>
-          <acceleration>0 2e-06 -1e-06 -5.3e-05 0 2.2e-05</acceleration>
-          <wrench>0 0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box'>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- python autokit driver node -->
+    <node pkg="sphero_rvr_driver" type="sparkfun_autokit_driver.py" name="rvr_autokit" output="screen">
+    </node>
+</launch>

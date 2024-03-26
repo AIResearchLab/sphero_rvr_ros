@@ -37,8 +37,11 @@ if __name__ == '__main__':
 
     # randomly assign a new location for the light source
     (x, y, z) = randomize_light_source_location(0)
+    # randomly assign a new location for the color source
+    (x1, y1, z1) = randomize_light_source_location(1)
     # log the location
     rospy.loginfo("Light source location: (%f, %f, %f)", x, y, z)
+    rospy.loginfo("Color source location: (%f, %f, %f)", x1, y1, z1)
 
     # publish transform
     while not rospy.is_shutdown():
@@ -48,6 +51,14 @@ if __name__ == '__main__':
             (0.0, 0.0, 0.0, 1.0),
             rospy.Time.now(),
             'illuminance_source',
+            'odom'
+        )
+
+        tf_broadcaster.sendTransform(
+            (x1, y1, 0.1),
+            (0.0, 0.0, 0.0, 1.0),
+            rospy.Time.now(),
+            'color_source',
             'odom'
         )
 

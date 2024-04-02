@@ -21,6 +21,5 @@
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>gazebo_ros_control</exec_depend>
 
-  <exec_depend>turtlebot3_gazebo</exec_depend>
   <exec_depend>hector_gazebo_plugins</exec_depend>
 </package>

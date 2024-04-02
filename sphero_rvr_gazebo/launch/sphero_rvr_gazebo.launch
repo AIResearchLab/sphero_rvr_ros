@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="world_name" default="worlds/empty.world"/>
-    <!-- <arg name="world_name" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_autorace.world"/> -->
-    <!-- <arg name="world_name" default="$(find turtlebot3_gazebo)/worlds/turtlebot3_house.world"/> -->
-    <!-- <env name="GAZEBO_RESOURCE_PATH" value="$(find turtlebot3_gazebo)/models/turtlebot3_autorace/ground_picture" /> -->
     <!-- <arg name="world_name" default="$(find sphero_rvr_algorithms)/worlds/obstacles.world"/> -->
     <!-- <arg name="world_name" default="$(find sphero_rvr_algorithms)/worlds/ball_maze.world"/> -->
 

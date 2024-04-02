@@ -17,4 +17,3 @@ Some interesting packages in this application are:
 - `sphero_rvr_description`: URDF description of the RVR robot.
 - `sphero_rvr_driver`: ROS1 node that interfaces with the RVR robot using the sphero-rvr-sdk.
 - `sphero_rvr_controllers`: ROS1 node that provides a simple control interface for the RVR robot.
-- `sphero_rvr_gazebo`: ROS1 package that contains a Gazebo simulation of the RVR robot.
